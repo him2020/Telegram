@@ -59,11 +59,17 @@ public:
     ConnectionState getConnectionState();
     void setUserId(int32_t userId);
     void switchBackend(bool restart);
+    void switchConnectServer(std::string hostName, std::string hostAddress, std::vector<uint32_t> ports);
     void resumeNetwork(bool partial);
     void pauseNetwork();
     void setNetworkAvailable(bool value, int32_t type, bool slow);
     void setIpStrategy(uint8_t value);
-    void init(uint32_t version, int32_t layer, int32_t apiId, std::string deviceModel, std::string systemVersion, std::string appVersion, std::string langCode, std::string systemLangCode, std::string configPath, std::string logPath, std::string regId, std::string cFingerprint, std::string installerId, std::string packageId, int32_t timezoneOffset, int32_t userId, bool isPaused, bool enablePushConnection, bool hasNetwork, int32_t networkType);
+    void init(uint32_t version, int32_t layer, int32_t apiId, std::string deviceModel, std::string systemVersion,
+              std::string appVersion, std::string langCode, std::string systemLangCode, std::string configPath,
+              std::string logPath, std::string regId, std::string cFingerprint, std::string installerId,
+              std::string packageId, std::string hostName, std::string hostAddress, std::vector<uint32_t> ports,
+              int32_t timezoneOffset, int32_t userId, bool isPaused,
+              bool enablePushConnection, bool hasNetwork, int32_t networkType);
     void setProxySettings(std::string address, uint16_t port, std::string username, std::string password, std::string secret);
     void setLangCode(std::string langCode);
     void setRegId(std::string regId);
@@ -138,6 +144,9 @@ private:
     int32_t pingTime;
     bool testBackend = false;
     bool clientBlocked = true;
+    std::string defaultHostName;
+    std::string defaultHostAddress;
+    std::vector<uint32_t> defaultPorts;
     std::string lastInitSystemLangcode = "";
     std::atomic<uint32_t> lastRequestToken{50000000};
     uint32_t currentDatacenterId = 0;

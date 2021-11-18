@@ -347,25 +347,44 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
             } else {
                 if (serverPublicKeys.empty()) {
                     if (ConnectionsManager::getInstance(currentDatacenter->instanceNum).testBackend) {
+//                        serverPublicKeys.emplace_back("-----BEGIN RSA PUBLIC KEY-----\n"
+//                                                      "MIIBCgKCAQEAyMEdY1aR+sCR3ZSJrtztKTKqigvO/vBfqACJLZtS7QMgCGXJ6XIR\n"
+//                                                      "yy7mx66W0/sOFa7/1mAZtEoIokDP3ShoqF4fVNb6XeqgQfaUHd8wJpDWHcR2OFwv\n"
+//                                                      "plUUI1PLTktZ9uW2WE23b+ixNwJjJGwBDJPQEQFBE+vfmH0JP503wr5INS1poWg/\n"
+//                                                      "j25sIWeYPHYeOrFp/eXaqhISP6G+q2IeTaWTXpwZj4LzXq5YOpk4bYEQ6mvRq7D1\n"
+//                                                      "aHWfYmlEGepfaYR8Q0YqvvhYtMte3ITnuSJs171+GDqpdKcSwHnd6FudwGO4pcCO\n"
+//                                                      "j4WcDuXc2CTHgH8gFTNhp/Y8/SpDOhvn9QIDAQAB\n"
+//                                                      "-----END RSA PUBLIC KEY-----");
+//                        serverPublicKeysFingerprints.push_back(0xb25898df208d2603);
                         serverPublicKeys.emplace_back("-----BEGIN RSA PUBLIC KEY-----\n"
-                                                      "MIIBCgKCAQEAyMEdY1aR+sCR3ZSJrtztKTKqigvO/vBfqACJLZtS7QMgCGXJ6XIR\n"
-                                                      "yy7mx66W0/sOFa7/1mAZtEoIokDP3ShoqF4fVNb6XeqgQfaUHd8wJpDWHcR2OFwv\n"
-                                                      "plUUI1PLTktZ9uW2WE23b+ixNwJjJGwBDJPQEQFBE+vfmH0JP503wr5INS1poWg/\n"
-                                                      "j25sIWeYPHYeOrFp/eXaqhISP6G+q2IeTaWTXpwZj4LzXq5YOpk4bYEQ6mvRq7D1\n"
-                                                      "aHWfYmlEGepfaYR8Q0YqvvhYtMte3ITnuSJs171+GDqpdKcSwHnd6FudwGO4pcCO\n"
-                                                      "j4WcDuXc2CTHgH8gFTNhp/Y8/SpDOhvn9QIDAQAB\n"
+                                                      "MIIBCgKCAQEAxMbm90HlrrNRayczDL/hQVpHc3HIFVFOxie3mfq9vwn51SVxZZC7\n"
+                                                      "2+1pLFDnnFKaWX+yReUopLFqw8wOrjJg4Wsar7V9zZr8h/cdzPDimvwahEJ/wkFy\n"
+                                                      "CEThg8qwWsICbutDpeIEDv5HVirQpWGmRG5DBKbkQrlCjdfA7yfAMuGfBGN3xJ6B\n"
+                                                      "JYEBWGvN7wQJUVlUTuLAA3w+tA67dpPzmmbCTMPnpTm6V8KDJCsA7mzBsIPFT8NU\n"
+                                                      "McIute4prCmyi22pszvQISPOkWcOYmEmCTSoN03mBCkHgJiff3OCPF9y8qXWE4Pj\n"
+                                                      "0P2vOvZQGM1jBaKrUutz/l7ya2VbgMxRCQIDAQAB\n"
                                                       "-----END RSA PUBLIC KEY-----");
-                        serverPublicKeysFingerprints.push_back(0xb25898df208d2603);
+                        serverPublicKeysFingerprints.push_back(0x8a2ff29f8ea48042);
                     } else {
+//                        serverPublicKeys.emplace_back("-----BEGIN RSA PUBLIC KEY-----\n"
+//                                                      "MIIBCgKCAQEA6LszBcC1LGzyr992NzE0ieY+BSaOW622Aa9Bd4ZHLl+TuFQ4lo4g\n"
+//                                                      "5nKaMBwK/BIb9xUfg0Q29/2mgIR6Zr9krM7HjuIcCzFvDtr+L0GQjae9H0pRB2OO\n"
+//                                                      "62cECs5HKhT5DZ98K33vmWiLowc621dQuwKWSQKjWf50XYFw42h21P2KXUGyp2y/\n"
+//                                                      "+aEyZ+uVgLLQbRA1dEjSDZ2iGRy12Mk5gpYc397aYp438fsJoHIgJ2lgMv5h7WY9\n"
+//                                                      "t6N/byY9Nw9p21Og3AoXSL2q/2IJ1WRUhebgAdGVMlV1fkuOQoEzR7EdpqtQD9Cs\n"
+//                                                      "5+bfo3Nhmcyvk5ftB0WkJ9z6bNZ7yxrP8wIDAQAB\n"
+//                                                      "-----END RSA PUBLIC KEY-----");
+//                        serverPublicKeysFingerprints.push_back(0xd09d1d85de64fd85);
                         serverPublicKeys.emplace_back("-----BEGIN RSA PUBLIC KEY-----\n"
-                                                      "MIIBCgKCAQEA6LszBcC1LGzyr992NzE0ieY+BSaOW622Aa9Bd4ZHLl+TuFQ4lo4g\n"
-                                                      "5nKaMBwK/BIb9xUfg0Q29/2mgIR6Zr9krM7HjuIcCzFvDtr+L0GQjae9H0pRB2OO\n"
-                                                      "62cECs5HKhT5DZ98K33vmWiLowc621dQuwKWSQKjWf50XYFw42h21P2KXUGyp2y/\n"
-                                                      "+aEyZ+uVgLLQbRA1dEjSDZ2iGRy12Mk5gpYc397aYp438fsJoHIgJ2lgMv5h7WY9\n"
-                                                      "t6N/byY9Nw9p21Og3AoXSL2q/2IJ1WRUhebgAdGVMlV1fkuOQoEzR7EdpqtQD9Cs\n"
-                                                      "5+bfo3Nhmcyvk5ftB0WkJ9z6bNZ7yxrP8wIDAQAB\n"
+                                                      "MIIBCgKCAQEAxMbm90HlrrNRayczDL/hQVpHc3HIFVFOxie3mfq9vwn51SVxZZC7\n"
+                                                      "2+1pLFDnnFKaWX+yReUopLFqw8wOrjJg4Wsar7V9zZr8h/cdzPDimvwahEJ/wkFy\n"
+                                                      "CEThg8qwWsICbutDpeIEDv5HVirQpWGmRG5DBKbkQrlCjdfA7yfAMuGfBGN3xJ6B\n"
+                                                      "JYEBWGvN7wQJUVlUTuLAA3w+tA67dpPzmmbCTMPnpTm6V8KDJCsA7mzBsIPFT8NU\n"
+                                                      "McIute4prCmyi22pszvQISPOkWcOYmEmCTSoN03mBCkHgJiff3OCPF9y8qXWE4Pj\n"
+                                                      "0P2vOvZQGM1jBaKrUutz/l7ya2VbgMxRCQIDAQAB\n"
                                                       "-----END RSA PUBLIC KEY-----");
-                        serverPublicKeysFingerprints.push_back(0xd09d1d85de64fd85);
+                        // serverPublicKeysFingerprints.push_back(0xc605674d92638003);
+                        serverPublicKeysFingerprints.push_back(0x8a2ff29f8ea48042);
                     }
                 }
 
@@ -488,6 +507,13 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
             innerData->serializeToStream(innerDataBuffer);
             delete innerData;
 
+            if (LOGS_ENABLED) {
+                uint32_t len = innerDataBuffer->limit() / 3;
+                DEBUG_E("init data of DH: %s", FileLog::BytesToHexString(innerDataBuffer->bytes(), len).c_str());
+                DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len, len).c_str());
+                DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
+            }
+
             BIO *keyBio = BIO_new(BIO_s_mem());
             BIO_write(keyBio, key.c_str(), (int) key.length());
             RSA *rsaKey = PEM_read_bio_RSAPublicKey(keyBio, nullptr, nullptr, nullptr);
@@ -498,7 +524,12 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
                 for (uint32_t i = 0; i < paddedDataSize; i++) {
                     innerDataBuffer->bytes()[keySize + i] = innerDataBuffer->bytes()[encryptedDataSize + paddedDataSize - i - 1];
                 }
-
+                if (LOGS_ENABLED) {
+                    uint32_t len = innerDataBuffer->limit() / 3;
+                    DEBUG_E("rand data of DH: %s", FileLog::BytesToHexString(innerDataBuffer->bytes(), len).c_str());
+                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len, len).c_str());
+                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
+                }
                 RAND_bytes(innerDataBuffer->bytes(), keySize);
                 SHA256_CTX sha256Ctx;
                 SHA256_Init(&sha256Ctx);
@@ -507,16 +538,42 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
                 SHA256_Final(innerDataBuffer->bytes() + keySize + paddedDataSize, &sha256Ctx);
 
                 memset(innerDataBuffer->bytes() + encryptedDataSize + paddedDataSize, 0, ivSize);
+                if (LOGS_ENABLED) {
+                    uint32_t len = innerDataBuffer->limit() / 3;
+                    DEBUG_E("sha data of DH: %s", FileLog::BytesToHexString(innerDataBuffer->bytes(), len).c_str());
+                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len, len).c_str());
+                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
+                }
                 Datacenter::aesIgeEncryption(innerDataBuffer->bytes() + keySize, innerDataBuffer->bytes(), innerDataBuffer->bytes() + encryptedDataSize + paddedDataSize, true, true, paddedDataSize + SHA256_DIGEST_LENGTH);
+
+                if (LOGS_ENABLED) {
+                    uint32_t len = innerDataBuffer->limit() / 3;
+                    DEBUG_E("aes data of DH: %s", FileLog::BytesToHexString(innerDataBuffer->bytes(), len).c_str());
+                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len, len).c_str());
+                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
+                }
 
                 SHA256_Init(&sha256Ctx);
                 SHA256_Update(&sha256Ctx, innerDataBuffer->bytes() + keySize, paddedDataSize + SHA256_DIGEST_LENGTH);
                 SHA256_Final(innerDataBuffer->bytes() + encryptedDataSize + paddedDataSize + ivSize, &sha256Ctx);
 
+                if (LOGS_ENABLED) {
+                    uint32_t len = innerDataBuffer->limit() / 3;
+                    DEBUG_E("two sha data of DH: %s", FileLog::BytesToHexString(innerDataBuffer->bytes(), len).c_str());
+                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len, len).c_str());
+                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
+                }
+
                 for (uint32_t i = 0; i < keySize; i++) {
                     innerDataBuffer->bytes()[i] ^= innerDataBuffer->bytes()[encryptedDataSize + paddedDataSize + ivSize + i];
                 }
 
+                if (LOGS_ENABLED) {
+                    uint32_t len = innerDataBuffer->limit() / 3;
+                    DEBUG_E("encrypted data of DH: %s", FileLog::BytesToHexString(innerDataBuffer->bytes(), len).c_str());
+                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len, len).c_str());
+                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
+                }
                 bool ok = false;
                 uint32_t offset = encryptedDataSize + paddedDataSize + ivSize + SHA256_DIGEST_LENGTH;
                 size_t resLen = BN_bn2bin(rsaKey->n, innerDataBuffer->bytes() + offset);
@@ -537,6 +594,37 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
                 }
             }
 
+            if (LOGS_ENABLED) {
+                DEBUG_E("encrypted data of DH: %s", FileLog::BytesToHexString(innerDataBuffer->bytes(), encryptedDataSize).c_str());
+            }
+
+            // 解码测试
+            if (ConnectionsManager::getInstance(currentDatacenter->instanceNum).testBackend) {
+                NativeByteBuffer *dBuf = BuffersStorage::getInstance().getFreeBuffer(encryptedDataSize + paddedDataSize + ivSize + SHA256_DIGEST_LENGTH + 256);
+                dBuf->writeBytes(innerDataBuffer->bytes(), innerDataBuffer->limit());
+                memset(dBuf->bytes() + encryptedDataSize, 0, dBuf->limit() - encryptedDataSize);
+
+                SHA256_CTX sha256Ctx;
+                SHA256_Init(&sha256Ctx);
+                SHA256_Update(&sha256Ctx, dBuf->bytes() + keySize, paddedDataSize + SHA256_DIGEST_LENGTH);
+                SHA256_Final(dBuf->bytes() + encryptedDataSize + paddedDataSize + ivSize, &sha256Ctx);
+
+                for (uint32_t i = 0; i < keySize; i++) {
+                    dBuf->bytes()[i] ^= dBuf->bytes()[encryptedDataSize + paddedDataSize + ivSize + i];
+                }
+
+                Datacenter::aesIgeEncryption(dBuf->bytes() + keySize, dBuf->bytes(), dBuf->bytes() + encryptedDataSize + paddedDataSize, false, true, paddedDataSize + SHA256_DIGEST_LENGTH);
+
+                if (LOGS_ENABLED) {
+                    uint32_t len = dBuf->limit() / 3;
+                    DEBUG_E("decrypted data of DH: %s", FileLog::BytesToHexString(dBuf->bytes(), len).c_str());
+                    DEBUG_E("%s", FileLog::BytesToHexString(dBuf->bytes() + len, len).c_str());
+                    DEBUG_E("%s", FileLog::BytesToHexString(dBuf->bytes() + len + len, dBuf->limit() - len - len).c_str());
+                }
+                dBuf->reuse();
+            }
+
+
             if (bnContext == nullptr) {
                 bnContext = BN_CTX_new();
             }
@@ -555,6 +643,10 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
             innerDataBuffer->reuse();
 
             request->encrypted_data = std::unique_ptr<ByteArray>(rsaEncryptedData);
+
+            if (LOGS_ENABLED) {
+                DEBUG_E("rsa encrypted data of DH: %s", FileLog::BytesToHexString(request->encrypted_data->bytes, request->encrypted_data->length).c_str());
+            }
 
             sendAckRequest(messageId);
             sendRequestData(request, true);

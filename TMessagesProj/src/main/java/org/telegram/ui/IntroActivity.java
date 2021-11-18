@@ -71,6 +71,7 @@ public class IntroActivity extends Activity implements NotificationCenter.Notifi
     private BottomPagesView bottomPages;
     private TextView textView;
     private TextView startMessagingButton;
+    private TextView selectServerTypeButton;
     private FrameLayout frameLayout2;
 
     private int lastPage = 0;
@@ -132,9 +133,10 @@ public class IntroActivity extends Activity implements NotificationCenter.Notifi
                 bottomPages.layout(x, y, x + bottomPages.getMeasuredWidth(), y + bottomPages.getMeasuredHeight());
                 viewPager.layout(0, 0, viewPager.getMeasuredWidth(), viewPager.getMeasuredHeight());
 
-                y = oneFourth * 3 + (oneFourth - startMessagingButton.getMeasuredHeight()) / 2;
+                y = oneFourth * 3 + (oneFourth - startMessagingButton.getMeasuredHeight() - selectServerTypeButton.getMeasuredHeight() - 10) / 2;
                 x = (getMeasuredWidth() - startMessagingButton.getMeasuredWidth()) / 2;
                 startMessagingButton.layout(x, y, x + startMessagingButton.getMeasuredWidth(), y + startMessagingButton.getMeasuredHeight());
+                selectServerTypeButton.layout(x, y + startMessagingButton.getMeasuredHeight() + AndroidUtilities.dp(10), x + selectServerTypeButton.getMeasuredWidth(), y + startMessagingButton.getMeasuredHeight() + AndroidUtilities.dp(10) + selectServerTypeButton.getMeasuredHeight());
                 y -= AndroidUtilities.dp(30);
                 x = (getMeasuredWidth() - textView.getMeasuredWidth()) / 2;
                 textView.layout(x, y - textView.getMeasuredHeight(), x + textView.getMeasuredWidth(), y);
@@ -264,6 +266,48 @@ public class IntroActivity extends Activity implements NotificationCenter.Notifi
             intent2.putExtra("fromIntro", true);
             startActivity(intent2);
             destroyed = true;
+            finish();
+        });
+
+        selectServerTypeButton = new TextView(this) {
+            CellFlickerDrawable cellFlickerDrawable;
+
+            @Override
+            protected void onDraw(Canvas canvas) {
+                super.onDraw(canvas);
+                if (cellFlickerDrawable == null) {
+                    cellFlickerDrawable = new CellFlickerDrawable();
+                    cellFlickerDrawable.drawFrame = false;
+                    cellFlickerDrawable.repeatProgress = 2f;
+                }
+                cellFlickerDrawable.setParentWidth(getMeasuredWidth());
+                AndroidUtilities.rectTmp.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
+                cellFlickerDrawable.draw(canvas, AndroidUtilities.rectTmp, AndroidUtilities.dp(4));
+                invalidate();
+            }
+
+            @Override
+            protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+                int size = MeasureSpec.getSize(widthMeasureSpec);
+                if (size > AndroidUtilities.dp(260)) {
+                    super.onMeasure(MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(320), MeasureSpec.EXACTLY), heightMeasureSpec);
+                } else {
+                    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+                }
+            }
+        };
+        selectServerTypeButton.setText(LocaleController.getString("SelectServerType", R.string.SelectServerType));
+        selectServerTypeButton.setGravity(Gravity.CENTER);
+        selectServerTypeButton.setTextColor(0xffffffff);
+        selectServerTypeButton.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        selectServerTypeButton.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+        selectServerTypeButton.setBackgroundDrawable(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(4), 0xff50a8eb, 0xff439bde));
+        selectServerTypeButton.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
+        frameLayout.addView(selectServerTypeButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 42, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 36, 0, 36, 76));
+        selectServerTypeButton.setOnClickListener(view -> {
+            Intent intent2 = new Intent(IntroActivity.this, SwitchServerActivity.class);
+            intent2.putExtra("fromIntro", true);
+            startActivity(intent2);
             finish();
         });
 

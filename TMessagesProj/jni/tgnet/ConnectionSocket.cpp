@@ -36,6 +36,28 @@
 
 #define MAX_GREASE 8
 
+std::vector<std::string> hostNameToIp(std::string hostname) {
+    std::vector<std::string> result;
+    struct addrinfo *ai, hints, *curr;
+    char ip[16];
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_CANONNAME;
+
+    int ret = getaddrinfo(hostname.c_str(), NULL, &hints, &ai);
+    if (ret != 0) {
+        return result;
+    }
+
+    for (curr = ai; curr != NULL; curr = curr->ai_next) {
+        inet_ntop(AF_INET, &(((struct sockaddr_in *)(curr->ai_addr))->sin_addr), ip, 16);
+        result.push_back(ip);
+    }
+    freeaddrinfo(ai);
+    return result;
+}
+
 static BIGNUM *get_y2(BIGNUM *x, const BIGNUM *mod, BN_CTX *big_num_context) {
     // returns y^2 = x^3 + 486662 * x^2 + x
     BIGNUM *y = BN_dup(x);

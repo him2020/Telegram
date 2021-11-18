@@ -20,6 +20,7 @@ jclass jclass_WriteToSocketDelegate;
 jmethodID jclass_WriteToSocketDelegate_run;
 
 jclass jclass_ConnectionsManager;
+jmethodID jclass_ConnectionsManager_onBindHostName;
 jmethodID jclass_ConnectionsManager_onUnparsedMessageReceived;
 jmethodID jclass_ConnectionsManager_onUpdate;
 jmethodID jclass_ConnectionsManager_onSessionCreated;
@@ -198,6 +199,30 @@ void switchBackend(JNIEnv *env, jclass c, jint instanceNum, jboolean restart) {
     ConnectionsManager::getInstance(instanceNum).switchBackend(restart);
 }
 
+void switchConnectServer(JNIEnv *env, jclass c, jint instanceNum, jstring hostName, jstring hostAddress, jintArray ports) {
+    const char *hostNameStr = env->GetStringUTFChars(hostName, 0);
+    const char *hostAddressStr = env->GetStringUTFChars(hostAddress, 0);
+    std::vector<uint32_t> hostPorts;
+    jboolean isCopy = 0;
+    jint* portsArray = env->GetIntArrayElements(ports, &isCopy);
+    if (portsArray != 0) {
+        jint len = env->GetArrayLength(ports);
+        for (int i=0; i<len; i ++) {
+            hostPorts.push_back(portsArray[i]);
+        }
+        env->ReleaseIntArrayElements(ports, portsArray, 0);
+    }
+
+    ConnectionsManager::getInstance(instanceNum).switchConnectServer(std::string(hostNameStr), std::string(hostAddressStr), hostPorts);
+
+    if (hostNameStr != 0) {
+        env->ReleaseStringUTFChars(hostName, hostNameStr);
+    }
+    if (hostAddressStr != 0) {
+        env->ReleaseStringUTFChars(hostAddress, hostAddressStr);
+    }
+}
+
 void pauseNetwork(JNIEnv *env, jclass c, jint instanceNum) {
     ConnectionsManager::getInstance(instanceNum).pauseNetwork();
 }
@@ -264,7 +289,15 @@ jlong checkProxy(JNIEnv *env, jclass c, jint instanceNum, jstring address, jint 
 }
 
 class Delegate : public ConnectiosManagerDelegate {
-    
+
+    void onBindHostName(std::string hostName, std::string hostAddress, int32_t instanceNum) {
+        jstring hostNameStr = jniEnv[instanceNum]->NewStringUTF(hostName.c_str());
+        jstring hostAddressStr = jniEnv[instanceNum]->NewStringUTF(hostAddress.c_str());
+        jniEnv[instanceNum]->CallStaticVoidMethod(jclass_ConnectionsManager, jclass_ConnectionsManager_onBindHostName, hostNameStr, hostAddressStr, instanceNum);
+        jniEnv[instanceNum]->DeleteLocalRef(hostNameStr);
+        jniEnv[instanceNum]->DeleteLocalRef(hostAddressStr);
+    }
+
     void onUpdate(int32_t instanceNum) {
         jniEnv[instanceNum]->CallStaticVoidMethod(jclass_ConnectionsManager, jclass_ConnectionsManager_onUpdate, instanceNum);
     }
@@ -371,7 +404,11 @@ void setSystemLangCode(JNIEnv *env, jclass c, jint instanceNum, jstring langCode
     }
 }
 
-void init(JNIEnv *env, jclass c, jint instanceNum, jint version, jint layer, jint apiId, jstring deviceModel, jstring systemVersion, jstring appVersion, jstring langCode, jstring systemLangCode, jstring configPath, jstring logPath, jstring regId, jstring cFingerprint, jstring installerId, jstring packageId, jint timezoneOffset, jint userId, jboolean enablePushConnection, jboolean hasNetwork, jint networkType) {
+void init(JNIEnv *env, jclass c, jint instanceNum, jint version, jint layer, jint apiId, jstring deviceModel,
+          jstring systemVersion, jstring appVersion, jstring langCode, jstring systemLangCode, jstring configPath,
+          jstring logPath, jstring regId, jstring cFingerprint, jstring installerId, jstring packageId,
+          jstring hostName, jstring hostAddress, jintArray ports,
+          jint timezoneOffset, jint userId, jboolean enablePushConnection, jboolean hasNetwork, jint networkType) {
     const char *deviceModelStr = env->GetStringUTFChars(deviceModel, 0);
     const char *systemVersionStr = env->GetStringUTFChars(systemVersion, 0);
     const char *appVersionStr = env->GetStringUTFChars(appVersion, 0);
@@ -382,9 +419,26 @@ void init(JNIEnv *env, jclass c, jint instanceNum, jint version, jint layer, jin
     const char *regIdStr = env->GetStringUTFChars(regId, 0);
     const char *cFingerprintStr = env->GetStringUTFChars(cFingerprint, 0);
     const char *installerIdStr = env->GetStringUTFChars(installerId, 0);
+    const char *hostNameStr = env->GetStringUTFChars(hostName, 0);
+    const char *hostAddressStr = env->GetStringUTFChars(hostAddress, 0);
     const char *packageIdStr = env->GetStringUTFChars(packageId, 0);
 
-    ConnectionsManager::getInstance(instanceNum).init((uint32_t) version, layer, apiId, std::string(deviceModelStr), std::string(systemVersionStr), std::string(appVersionStr), std::string(langCodeStr), std::string(systemLangCodeStr), std::string(configPathStr), std::string(logPathStr), std::string(regIdStr), std::string(cFingerprintStr), std::string(installerIdStr), std::string(packageIdStr), timezoneOffset, userId, true, enablePushConnection, hasNetwork, networkType);
+    std::vector<uint32_t> hostPorts;
+    jboolean isCopy = 0;
+    jint* portsArray = env->GetIntArrayElements(ports, &isCopy);
+    if (portsArray != 0) {
+        jint len = env->GetArrayLength(ports);
+        for (int i=0; i<len; i ++) {
+            hostPorts.push_back(portsArray[i]);
+        }
+        env->ReleaseIntArrayElements(ports, portsArray, 0);
+    }
+    ConnectionsManager::getInstance(instanceNum).init(
+            (uint32_t) version, layer, apiId, std::string(deviceModelStr), std::string(systemVersionStr),
+            std::string(appVersionStr), std::string(langCodeStr), std::string(systemLangCodeStr),
+            std::string(configPathStr), std::string(logPathStr), std::string(regIdStr), std::string(cFingerprintStr),
+            std::string(installerIdStr), std::string(packageIdStr), std::string(hostNameStr), std::string(hostAddressStr), hostPorts,
+            timezoneOffset, userId, true, enablePushConnection, hasNetwork, networkType);
 
     if (deviceModelStr != 0) {
         env->ReleaseStringUTFChars(deviceModel, deviceModelStr);
@@ -412,6 +466,12 @@ void init(JNIEnv *env, jclass c, jint instanceNum, jint version, jint layer, jin
     }
     if (cFingerprintStr != 0) {
         env->ReleaseStringUTFChars(cFingerprint, cFingerprintStr);
+    }
+    if (hostNameStr != 0) {
+        env->ReleaseStringUTFChars(hostName, hostNameStr);
+    }
+    if (hostAddressStr != 0) {
+        env->ReleaseStringUTFChars(hostAddress, hostAddressStr);
     }
     if (installerIdStr != 0) {
         env->ReleaseStringUTFChars(installerId, installerIdStr);
@@ -444,11 +504,12 @@ static JNINativeMethod ConnectionsManagerMethods[] = {
         {"native_setProxySettings", "(ILjava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", (void *) setProxySettings},
         {"native_getConnectionState", "(I)I", (void *) getConnectionState},
         {"native_setUserId", "(II)V", (void *) setUserId},
-        {"native_init", "(IIIILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IIZZI)V", (void *) init},
+        {"native_init", "(IIIILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[IIIZZI)V", (void *) init},
         {"native_setLangCode", "(ILjava/lang/String;)V", (void *) setLangCode},
         {"native_setRegId", "(ILjava/lang/String;)V", (void *) setRegId},
         {"native_setSystemLangCode", "(ILjava/lang/String;)V", (void *) setSystemLangCode},
         {"native_switchBackend", "(IZ)V", (void *) switchBackend},
+        {"native_switchConnectServer", "(ILjava/lang/String;Ljava/lang/String;[I)V", (void *) switchConnectServer},
         {"native_pauseNetwork", "(I)V", (void *) pauseNetwork},
         {"native_resumeNetwork", "(IZ)V", (void *) resumeNetwork},
         {"native_updateDcSettings", "(I)V", (void *) updateDcSettings},
@@ -521,6 +582,10 @@ extern "C" int registerNativeTgNetFunctions(JavaVM *vm, JNIEnv *env) {
     }
     jclass_ConnectionsManager = (jclass) env->NewGlobalRef(env->FindClass("org/telegram/tgnet/ConnectionsManager"));
     if (jclass_ConnectionsManager == 0) {
+        return JNI_FALSE;
+    }
+    jclass_ConnectionsManager_onBindHostName = env->GetStaticMethodID(jclass_ConnectionsManager, "onBindHostName", "(Ljava/lang/String;Ljava/lang/String;I)V");
+    if (jclass_ConnectionsManager_onBindHostName == 0) {
         return JNI_FALSE;
     }
     jclass_ConnectionsManager_onUnparsedMessageReceived = env->GetStaticMethodID(jclass_ConnectionsManager, "onUnparsedMessageReceived", "(JI)V");

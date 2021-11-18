@@ -266,22 +266,22 @@ public class ApplicationLoader extends Application {
                 Utilities.globalQueue.postRunnable(() -> {
                     try {
                         SharedConfig.pushStringGetTimeStart = SystemClock.elapsedRealtime();
-                        FirebaseMessaging.getInstance().getToken()
-                                .addOnCompleteListener(task -> {
-                                    SharedConfig.pushStringGetTimeEnd = SystemClock.elapsedRealtime();
-                                    if (!task.isSuccessful()) {
-                                        if (BuildVars.LOGS_ENABLED) {
-                                            FileLog.d("Failed to get regid");
-                                        }
-                                        SharedConfig.pushStringStatus = "__FIREBASE_FAILED__";
-                                        GcmPushListenerService.sendRegistrationToServer(null);
-                                        return;
-                                    }
-                                    String token = task.getResult();
-                                    if (!TextUtils.isEmpty(token)) {
-                                        GcmPushListenerService.sendRegistrationToServer(token);
-                                    }
-                                });
+//                        FirebaseMessaging.getInstance().getToken()
+//                                .addOnCompleteListener(task -> {
+//                                    SharedConfig.pushStringGetTimeEnd = SystemClock.elapsedRealtime();
+//                                    if (!task.isSuccessful()) {
+//                                        if (BuildVars.LOGS_ENABLED) {
+//                                            FileLog.d("Failed to get regid");
+//                                        }
+//                                        SharedConfig.pushStringStatus = "__FIREBASE_FAILED__";
+//                                        GcmPushListenerService.sendRegistrationToServer(null);
+//                                        return;
+//                                    }
+//                                    String token = task.getResult();
+//                                    if (!TextUtils.isEmpty(token)) {
+//                                        GcmPushListenerService.sendRegistrationToServer(token);
+//                                    }
+//                                });
                     } catch (Throwable e) {
                         FileLog.e(e);
                     }

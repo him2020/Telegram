@@ -92,4 +92,6 @@ private:
     friend class Connection;
 };
 
+extern std::vector<std::string> hostNameToIp(std::string hostname);
+
 #endif

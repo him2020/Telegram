@@ -255,6 +255,15 @@ public class LocaleController {
                 "tr", "vi", "wo", "yo", "zh", "bo", "dz", "id", "jv", "jw", "ka", "km", "kn", "ms", "th", "in"}, new PluralRules_None());
 
         LocaleInfo localeInfo = new LocaleInfo();
+        localeInfo.name = "简体中文";
+        localeInfo.nameEnglish = "Chinese (Simplified)";
+        localeInfo.shortName = localeInfo.pluralLangCode = "zh_cn";
+        localeInfo.pathToFile = null;
+        localeInfo.builtIn = true;
+        languages.add(localeInfo);
+        languagesDict.put(localeInfo.shortName, localeInfo);
+
+        localeInfo = new LocaleInfo();
         localeInfo.name = "English";
         localeInfo.nameEnglish = "English";
         localeInfo.shortName = localeInfo.pluralLangCode = "en";
@@ -469,13 +478,13 @@ public class LocaleController {
 
     private String getLocaleString(Locale locale) {
         if (locale == null) {
-            return "en";
+            return "zh_cn";
         }
         String languageCode = locale.getLanguage();
         String countryCode = locale.getCountry();
         String variantCode = locale.getVariant();
         if (languageCode.length() == 0 && countryCode.length() == 0) {
-            return "en";
+            return "zh_cn";
         }
         StringBuilder result = new StringBuilder(11);
         result.append(languageCode);
@@ -493,13 +502,13 @@ public class LocaleController {
     public static String getSystemLocaleStringIso639() {
         Locale locale = getInstance().getSystemDefaultLocale();
         if (locale == null) {
-            return "en";
+            return "zh_cn";
         }
         String languageCode = locale.getLanguage();
         String countryCode = locale.getCountry();
         String variantCode = locale.getVariant();
         if (languageCode.length() == 0 && countryCode.length() == 0) {
-            return "en";
+            return "zh_cn";
         }
         StringBuilder result = new StringBuilder(11);
         result.append(languageCode);
@@ -521,13 +530,13 @@ public class LocaleController {
         }
         Locale locale = getInstance().currentLocale;
         if (locale == null) {
-            return "en";
+            return "zh_cn";
         }
         String languageCode = locale.getLanguage();
         String countryCode = locale.getCountry();
         String variantCode = locale.getVariant();
         if (languageCode.length() == 0 && countryCode.length() == 0) {
-            return "en";
+            return "zh_cn";
         }
         StringBuilder result = new StringBuilder(11);
         result.append(languageCode);
@@ -682,6 +691,9 @@ public class LocaleController {
             }
             if (info == null) {
                 info = getLanguageFromDict(getLocaleString(systemDefaultLocale));
+            }
+            if (info == null) {
+                info = getLanguageFromDict("zh_cn");
             }
             if (info == null) {
                 info = getLanguageFromDict("en");
@@ -1417,7 +1429,7 @@ public class LocaleController {
                 if (currentPluralRules == null) {
                     currentPluralRules = allRules.get(currentLocale.getLanguage());
                     if (currentPluralRules == null) {
-                        currentPluralRules = allRules.get("en");
+                        currentPluralRules = allRules.get("zh_cn");
                     }
                 }
             }

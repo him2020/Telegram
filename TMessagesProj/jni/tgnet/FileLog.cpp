@@ -19,7 +19,7 @@
 #ifdef DEBUG_VERSION
 bool LOGS_ENABLED = true;
 #else
-bool LOGS_ENABLED = false;
+bool LOGS_ENABLED = true;
 #endif
 
 FileLog &FileLog::getInstance() {
@@ -37,6 +37,15 @@ void FileLog::init(std::string path) {
         logFile = fopen(path.c_str(), "w");
     }
     pthread_mutex_unlock(&mutex);
+}
+
+std::string FileLog::BytesToHexString(uint8_t* bytes, uint32_t len) {
+    std::string result;
+    result.resize(len << 1);
+    for (uint32_t i =0; i<len; ++i) {
+        sprintf((char*)result.c_str() + (i << 1), "%02x", bytes[i]);
+    }
+    return result;
 }
 
 void FileLog::e(const char *message, ...) {

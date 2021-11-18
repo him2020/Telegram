@@ -96,6 +96,8 @@ public class ConnectionsManager extends BaseController {
     private int connectionState;
     private AtomicInteger lastRequestToken = new AtomicInteger(1);
     private int appResumeCount;
+    private String hostName;
+    private String hostAddress;
 
     private static AsyncTask currentTask;
 
@@ -206,7 +208,13 @@ public class ConnectionsManager extends BaseController {
 
         int timezoneOffset = (TimeZone.getDefault().getRawOffset() + TimeZone.getDefault().getDSTSavings()) / 1000;
 
-        init(BuildVars.BUILD_VERSION, TLRPC.LAYER, BuildVars.APP_ID, deviceModel, systemVersion, appVersion, langCode, systemLangCode, configPath, FileLog.getNetworkLogPath(), pushString, fingerprint, timezoneOffset, getUserConfig().getClientUserId(), enablePushConnection);
+        hostName = BuildVars.HOST_NAME;
+        hostAddress = BuildVars.HOST_ADDRESS;
+
+        init(BuildVars.BUILD_VERSION, TLRPC.LAYER, BuildVars.APP_ID, deviceModel, systemVersion, appVersion,
+                langCode, systemLangCode, configPath, FileLog.getNetworkLogPath(), pushString, fingerprint,
+                hostName, hostAddress, BuildVars.DEFAULT_PORTS,
+                timezoneOffset, getUserConfig().getClientUserId(), enablePushConnection);
     }
 
     private String getRegId() {
@@ -352,6 +360,19 @@ public class ConnectionsManager extends BaseController {
         return connectionState;
     }
 
+    public void setHostName(String hostName, String hostAddress) {
+        this.hostName = hostName;
+        this.hostAddress = hostAddress;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public String getHostAddress() {
+        return hostAddress;
+    }
+
     public void setUserId(int id) {
         native_setUserId(currentAccount, id);
     }
@@ -365,7 +386,10 @@ public class ConnectionsManager extends BaseController {
         native_setPushConnectionEnabled(currentAccount, value);
     }
 
-    public void init(int version, int layer, int apiId, String deviceModel, String systemVersion, String appVersion, String langCode, String systemLangCode, String configPath, String logPath, String regId, String cFingerprint, int timezoneOffset, int userId, boolean enablePushConnection) {
+    public void init(int version, int layer, int apiId, String deviceModel, String systemVersion, String appVersion,
+                     String langCode, String systemLangCode, String configPath, String logPath, String regId,
+                     String cFingerprint, String hostName, String hostAddress, int[] ports,
+                     int timezoneOffset, int userId, boolean enablePushConnection) {
         SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("mainconfig", Activity.MODE_PRIVATE);
         String proxyAddress = preferences.getString("proxy_ip", "");
         String proxyUsername = preferences.getString("proxy_user", "");
@@ -394,7 +418,11 @@ public class ConnectionsManager extends BaseController {
             packageId = "";
         }
 
-        native_init(currentAccount, version, layer, apiId, deviceModel, systemVersion, appVersion, langCode, systemLangCode, configPath, logPath, regId, cFingerprint, installer, packageId, timezoneOffset, userId, enablePushConnection, ApplicationLoader.isNetworkOnline(), ApplicationLoader.getCurrentNetworkType());
+        native_init(currentAccount, version, layer, apiId, deviceModel, systemVersion, appVersion, langCode,
+                systemLangCode, configPath, logPath, regId, cFingerprint, installer, packageId,
+                hostName, hostAddress, ports,
+                timezoneOffset, userId, enablePushConnection, ApplicationLoader.isNetworkOnline(),
+                ApplicationLoader.getCurrentNetworkType());
         checkConnection();
     }
 
@@ -429,6 +457,11 @@ public class ConnectionsManager extends BaseController {
         SharedPreferences preferences = MessagesController.getGlobalMainSettings();
         preferences.edit().remove("language_showed2").commit();
         native_switchBackend(currentAccount, restart);
+    }
+
+    public void switchConnectServer(String hostName, String hostAddress) {
+        setHostName(hostName, hostAddress);
+        native_switchConnectServer(currentAccount, hostName, hostAddress, BuildVars.DEFAULT_PORTS);
     }
 
     public boolean isTestBackend() {
@@ -502,6 +535,12 @@ public class ConnectionsManager extends BaseController {
             lastPauseTime = 0;
             native_resumeNetwork(currentAccount, false);
         }
+    }
+
+    public static void onBindHostName(String hostName, String hostAddress, final int currentAccount) {
+        AndroidUtilities.runOnUIThread(() -> {
+            ConnectionsManager.getInstance(currentAccount).setHostName(hostName, hostAddress);
+        });
     }
 
     public static void onUnparsedMessageReceived(long address, final int currentAccount) {
@@ -694,6 +733,7 @@ public class ConnectionsManager extends BaseController {
     }
 
     public static native void native_switchBackend(int currentAccount, boolean restart);
+    public static native void native_switchConnectServer(int currentAccount, String hostName, String hostAddress, int[] ports);
     public static native int native_isTestBackend(int currentAccount);
     public static native void native_pauseNetwork(int currentAccount);
     public static native void native_setIpStrategy(int currentAccount, byte value);
@@ -712,7 +752,7 @@ public class ConnectionsManager extends BaseController {
     public static native void native_applyDatacenterAddress(int currentAccount, int datacenterId, String ipAddress, int port);
     public static native int native_getConnectionState(int currentAccount);
     public static native void native_setUserId(int currentAccount, int id);
-    public static native void native_init(int currentAccount, int version, int layer, int apiId, String deviceModel, String systemVersion, String appVersion, String langCode, String systemLangCode, String configPath, String logPath, String regId, String cFingerprint, String installer, String packageId, int timezoneOffset, int userId, boolean enablePushConnection, boolean hasNetwork, int networkType);
+    public static native void native_init(int currentAccount, int version, int layer, int apiId, String deviceModel, String systemVersion, String appVersion, String langCode, String systemLangCode, String configPath, String logPath, String regId, String cFingerprint, String installer, String packageId, String hostName, String hostAddress, int[] ports, int timezoneOffset, int userId, boolean enablePushConnection, boolean hasNetwork, int networkType);
     public static native void native_setProxySettings(int currentAccount, String address, int port, String username, String password, String secret);
     public static native void native_setLangCode(int currentAccount, String langCode);
     public static native void native_setRegId(int currentAccount, String regId);
@@ -838,15 +878,24 @@ public class ConnectionsManager extends BaseController {
             addresses.add(address);
         }
 
+
+        /**
+         * @param voids
+         * @return ResolvedDomain
+         *
+         * @desc
+         * request: https://site.ip138.com/domain/read.do?domain=aim.dobest.com&time=xxxxx
+         * response: {"status":true,"code":300,"msg":"7231b61251761a0ac4d12f62d44221e120211118103158","data":[{"ip":"180.101.193.205","sign":"de945cadf289a369b2cdd697633adb1e"}]}
+         */
         protected ResolvedDomain doInBackground(Void... voids) {
             ByteArrayOutputStream outbuf = null;
             InputStream httpConnectionStream = null;
             boolean done = false;
             try {
-                URL downloadUrl = new URL("https://www.google.com/resolve?name=" + currentHostName + "&type=A");
+                URL downloadUrl = new URL("https://site.ip138.com/domain/read.do?domain=" + currentHostName + "&time=" + Long.toString(System.currentTimeMillis() / 1000L));
                 URLConnection httpConnection = downloadUrl.openConnection();
                 httpConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A5297c Safari/602.1");
-                httpConnection.addRequestProperty("Host", "dns.google.com");
+                // httpConnection.addRequestProperty("Host", "site.ip138.com");
                 httpConnection.setConnectTimeout(1000);
                 httpConnection.setReadTimeout(2000);
                 httpConnection.connect();
@@ -867,13 +916,13 @@ public class ConnectionsManager extends BaseController {
                 }
 
                 JSONObject jsonObject = new JSONObject(new String(outbuf.toByteArray()));
-                if (jsonObject.has("Answer")) {
-                    JSONArray array = jsonObject.getJSONArray("Answer");
+                if (jsonObject.has("data")) {
+                    JSONArray array = jsonObject.getJSONArray("data");
                     int len = array.length();
                     if (len > 0) {
                         ArrayList<String> addresses = new ArrayList<>(len);
                         for (int a = 0; a < len; a++) {
-                            addresses.add(array.getJSONObject(a).getString("data"));
+                            addresses.add(array.getJSONObject(a).getString("ip"));
                         }
                         return new ResolvedDomain(addresses, SystemClock.elapsedRealtime());
                     }

@@ -15,7 +15,7 @@ public class BuildVars {
 
     public static boolean DEBUG_VERSION = false;
     public static boolean DEBUG_PRIVATE_VERSION = false;
-    public static boolean LOGS_ENABLED = false;
+    public static boolean LOGS_ENABLED = true;
     public static boolean USE_CLOUD_STRINGS = true;
     public static boolean CHECK_UPDATES = true;
     public static boolean NO_SCOPED_STORAGE = true/* || Build.VERSION.SDK_INT <= 28*/;
@@ -28,6 +28,10 @@ public class BuildVars {
     //
     public static String SMS_HASH = isStandaloneApp() ? "w0lkcmTZkKh" : (DEBUG_VERSION ? "O2P2z+/jBpJ" : "oLeq9AcOZkT");
     public static String PLAYSTORE_APP_URL = "https://play.google.com/store/apps/details?id=org.telegram.messenger";
+
+    public static String HOST_NAME = "aim.dobest.com";
+    public static String HOST_ADDRESS = "180.101.193.205";
+    public static int[] DEFAULT_PORTS = {8880,8443,5222,5223,5225};
 
     static {
         if (ApplicationLoader.applicationContext != null) {

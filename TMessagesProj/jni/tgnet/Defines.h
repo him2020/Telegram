@@ -138,6 +138,7 @@ typedef std::function<void(FileLoadFailReason reason)> onFailedFunc;
 typedef std::function<void(float progress)> onProgressChangedFunc;
 
 typedef struct ConnectiosManagerDelegate {
+    virtual void onBindHostName(std::string hostName, std::string hostAddress, int32_t instanceNum) = 0;
     virtual void onUpdate(int32_t instanceNum) = 0;
     virtual void onSessionCreated(int32_t instanceNum) = 0;
     virtual void onConnectionStateChanged(ConnectionState state, int32_t instanceNum) = 0;

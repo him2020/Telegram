@@ -368,6 +368,8 @@ void ConnectionsManager::loadConfig() {
                 clientBlocked = buffer->readBool(nullptr);
             }
             if (version >= 4) {
+                defaultHostName = buffer->readString(nullptr);
+                defaultHostAddress = buffer->readString(nullptr);
                 lastInitSystemLangcode = buffer->readString(nullptr);
             }
             if (buffer->readBool(nullptr)) {
@@ -399,6 +401,11 @@ void ConnectionsManager::loadConfig() {
                     datacenters[datacenter->getDatacenterId()] = datacenter;
                     if (LOGS_ENABLED) DEBUG_D("datacenter(%p) %u loaded (hasAuthKey = %d, 0x%" PRIx64 ")", datacenter, datacenter->getDatacenterId(), (int) datacenter->hasPermanentAuthKey(), datacenter->getPermanentAuthKeyId());
                 }
+                scheduleTask([&] {
+                    if (delegate != nullptr) {
+                        delegate->onBindHostName(defaultHostName, defaultHostAddress, instanceNum);
+                    }
+                });
             }
         }
         buffer->reuse();
@@ -438,6 +445,8 @@ void ConnectionsManager::saveConfigInternal(NativeByteBuffer *buffer) {
     buffer->writeInt32(configVersion);
     buffer->writeBool(testBackend);
     buffer->writeBool(clientBlocked);
+    buffer->writeString(defaultHostName);
+    buffer->writeString(defaultHostAddress);
     buffer->writeString(lastInitSystemLangcode);
     Datacenter *currentDatacenter = getDatacenterWithId(currentDatacenterId);
     buffer->writeBool(currentDatacenter != nullptr);
@@ -684,18 +693,19 @@ void ConnectionsManager::onConnectionClosed(Connection *connection, int reason) 
                     maxTimeout = 20;
                 }
                 if (disconnectTimeoutAmount >= maxTimeout) {
-                    if (!connection->hasUsefullData()) {
-                        if (LOGS_ENABLED) DEBUG_D("start requesting new address and port due to timeout reach");
-                        requestingSecondAddressByTlsHashMismatch = connection->hasTlsHashMismatch();
-                        if (requestingSecondAddressByTlsHashMismatch) {
-                            requestingSecondAddress = 1;
-                        } else {
-                            requestingSecondAddress = 0;
-                        }
-                        delegate->onRequestNewServerIpAndPort(requestingSecondAddress, instanceNum);
-                    } else {
-                        if (LOGS_ENABLED) DEBUG_D("connection has usefull data, don't request anything");
-                    }
+//                    if (!connection->hasUsefullData()) {
+//                        if (LOGS_ENABLED) DEBUG_D("start requesting new address and port due to timeout reach");
+//                        requestingSecondAddressByTlsHashMismatch = connection->hasTlsHashMismatch();
+//                        if (requestingSecondAddressByTlsHashMismatch) {
+//                            requestingSecondAddress = 1;
+//                        } else {
+//                            requestingSecondAddress = 0;
+//                        }
+//                        delegate->onRequestNewServerIpAndPort(requestingSecondAddress, instanceNum);
+//                    } else {
+//                        if (LOGS_ENABLED) DEBUG_D("connection has usefull data, don't request anything");
+//                    }
+                    if (LOGS_ENABLED) DEBUG_D("connection has timeout, don't request anything");
                     disconnectTimeoutAmount = 0;
                 }
             }
@@ -1675,65 +1685,110 @@ uint8_t ConnectionsManager::getIpStratagy() {
 }
 
 void ConnectionsManager::initDatacenters() {
-    Datacenter *datacenter;
-    if (!testBackend) {
-        if (datacenters.find(1) == datacenters.end()) {
-            datacenter = new Datacenter(instanceNum, 1);
-            datacenter->addAddressAndPort("149.154.175.50", 443, 0, "");
-            datacenter->addAddressAndPort("2001:b28:f23d:f001:0000:0000:0000:000a", 443, 1, "");
-            datacenters[1] = datacenter;
-        }
+//    int num = 0;
+//    int maxNum;
+//    std::string hostName, defaultAddress;
+//    if (serverType == "develop") {
+//        maxNum = 5;
+//        hostName = "10.191.73.183";
+//        defaultAddress = "10.191.73.183";
+//    } else if (serverType == "test") {
+//        maxNum = 5;
+//        hostName = "10.191.80.198";
+//        defaultAddress = "10.191.80.198";
+//    } else {
+//        maxNum = 5;
+//        hostName = "aim.dobest.com";
+//        defaultAddress = "180.101.193.205";
+//    }
+//    const uint32_t ports[] = {8880,8443,5222,5223,5225};
 
-        if (datacenters.find(2) == datacenters.end()) {
-            datacenter = new Datacenter(instanceNum, 2);
-            datacenter->addAddressAndPort("149.154.167.51", 443, 0, "");
-            datacenter->addAddressAndPort("95.161.76.100", 443, 0, "");
-            datacenter->addAddressAndPort("2001:67c:4e8:f002:0000:0000:0000:000a", 443, 1, "");
-            datacenters[2] = datacenter;
+    int num = 0;
+    int maxNum = defaultPorts.size();
+    std::vector<std::string> ips = hostNameToIp(defaultHostName);
+    if (ips.empty()) {
+        ips.push_back(defaultHostAddress);
+    }
+    for (auto & ip : ips) {
+        ++num;
+        if (datacenters.find(num) == datacenters.end()) {
+            Datacenter* datacenter = new Datacenter(instanceNum, num);
+            datacenter->addAddressAndPort(ip, defaultPorts[num-1], 0, "");
+            datacenters[num] = datacenter;
         }
+        if (num >= maxNum) {
+            break;
+        };
+    }
 
-        if (datacenters.find(3) == datacenters.end()) {
-            datacenter = new Datacenter(instanceNum, 3);
-            datacenter->addAddressAndPort("149.154.175.100", 443, 0, "");
-            datacenter->addAddressAndPort("2001:b28:f23d:f003:0000:0000:0000:000a", 443, 1, "");
-            datacenters[3] = datacenter;
-        }
-
-        if (datacenters.find(4) == datacenters.end()) {
-            datacenter = new Datacenter(instanceNum, 4);
-            datacenter->addAddressAndPort("149.154.167.91", 443, 0, "");
-            datacenter->addAddressAndPort("2001:67c:4e8:f004:0000:0000:0000:000a", 443, 1, "");
-            datacenters[4] = datacenter;
-        }
-
-        if (datacenters.find(5) == datacenters.end()) {
-            datacenter = new Datacenter(instanceNum, 5);
-            datacenter->addAddressAndPort("149.154.171.5", 443, 0, "");
-            datacenter->addAddressAndPort("2001:b28:f23f:f005:0000:0000:0000:000a", 443, 1, "");
-            datacenters[5] = datacenter;
-        }
-    } else {
-        if (datacenters.find(1) == datacenters.end()) {
-            datacenter = new Datacenter(instanceNum, 1);
-            datacenter->addAddressAndPort("149.154.175.40", 443, 0, "");
-            datacenter->addAddressAndPort("2001:b28:f23d:f001:0000:0000:0000:000e", 443, 1, "");
-            datacenters[1] = datacenter;
-        }
-
-        if (datacenters.find(2) == datacenters.end()) {
-            datacenter = new Datacenter(instanceNum, 2);
-            datacenter->addAddressAndPort("149.154.167.40", 443, 0, "");
-            datacenter->addAddressAndPort("2001:67c:4e8:f002:0000:0000:0000:000e", 443, 1, "");
-            datacenters[2] = datacenter;
-        }
-
-        if (datacenters.find(3) == datacenters.end()) {
-            datacenter = new Datacenter(instanceNum, 3);
-            datacenter->addAddressAndPort("149.154.175.117", 443, 0, "");
-            datacenter->addAddressAndPort("2001:b28:f23d:f003:0000:0000:0000:000e", 443, 1, "");
-            datacenters[3] = datacenter;
+    if (num < maxNum) {
+        for (int i=num+1; i <= maxNum; i++) {
+            if (datacenters.find(i) == datacenters.end()) {
+                Datacenter* datacenter = new Datacenter(instanceNum, i);
+                datacenter->addAddressAndPort(ips[0], defaultPorts[i-1], 0, "");
+                datacenters[i] = datacenter;
+            }
         }
     }
+
+//    Datacenter *datacenter;
+//    if (!testBackend) {
+//        if (datacenters.find(1) == datacenters.end()) {
+//            datacenter = new Datacenter(instanceNum, 1);
+//            datacenter->addAddressAndPort("149.154.175.50", 443, 0, "");
+//            datacenter->addAddressAndPort("2001:b28:f23d:f001:0000:0000:0000:000a", 443, 1, "");
+//            datacenters[1] = datacenter;
+//        }
+//
+//        if (datacenters.find(2) == datacenters.end()) {
+//            datacenter = new Datacenter(instanceNum, 2);
+//            datacenter->addAddressAndPort("149.154.167.51", 443, 0, "");
+//            datacenter->addAddressAndPort("95.161.76.100", 443, 0, "");
+//            datacenter->addAddressAndPort("2001:67c:4e8:f002:0000:0000:0000:000a", 443, 1, "");
+//            datacenters[2] = datacenter;
+//        }
+//
+//        if (datacenters.find(3) == datacenters.end()) {
+//            datacenter = new Datacenter(instanceNum, 3);
+//            datacenter->addAddressAndPort("149.154.175.100", 443, 0, "");
+//            datacenter->addAddressAndPort("2001:b28:f23d:f003:0000:0000:0000:000a", 443, 1, "");
+//            datacenters[3] = datacenter;
+//        }
+//
+//        if (datacenters.find(4) == datacenters.end()) {
+//            datacenter = new Datacenter(instanceNum, 4);
+//            datacenter->addAddressAndPort("149.154.167.91", 443, 0, "");
+//            datacenter->addAddressAndPort("2001:67c:4e8:f004:0000:0000:0000:000a", 443, 1, "");
+//            datacenters[4] = datacenter;
+//        }
+//
+//        if (datacenters.find(5) == datacenters.end()) {
+//            datacenter = new Datacenter(instanceNum, 5);
+//            datacenter->addAddressAndPort("149.154.171.5", 443, 0, "");
+//            datacenter->addAddressAndPort("2001:b28:f23f:f005:0000:0000:0000:000a", 443, 1, "");
+//            datacenters[5] = datacenter;
+//        }
+//    } else {
+//        if (datacenters.find(1) == datacenters.end()) {
+//            datacenter = new Datacenter(instanceNum, 1);
+//            datacenter->addAddressAndPort("149.154.175.40", 443, 0, "");
+//            datacenter->addAddressAndPort("2001:b28:f23d:f001:0000:0000:0000:000e", 443, 1, "");
+//            datacenters[1] = datacenter;
+//        }
+//
+//        if (datacenters.find(2) == datacenters.end()) {
+//            datacenter = new Datacenter(instanceNum, 2);
+//            datacenter->addAddressAndPort("149.154.167.40", 443, 0, "");
+//            datacenter->addAddressAndPort("2001:67c:4e8:f002:0000:0000:0000:000e", 443, 1, "");
+//            datacenters[2] = datacenter;
+//        }
+//
+//        if (datacenters.find(3) == datacenters.end()) {
+//            datacenter = new Datacenter(instanceNum, 3);
+//            datacenter->addAddressAndPort("149.154.175.117", 443, 0, "");
+//            datacenter->addAddressAndPort("2001:b28:f23d:f003:0000:0000:0000:000e", 443, 1, "");
+//            datacenters[3] = datacenter;
+//        }
 }
 
 void ConnectionsManager::attachConnection(ConnectionSocket *connection) {
@@ -1794,6 +1849,15 @@ int32_t ConnectionsManager::sendRequest(TLObject *object, onCompleteFunc onCompl
 
 #ifdef ANDROID
 void ConnectionsManager::sendRequest(TLObject *object, onCompleteFunc onComplete, onQuickAckFunc onQuickAck, onWriteToSocketFunc onWriteToSocket, uint32_t flags, uint32_t datacenterId, ConnectionType connetionType, bool immediate, int32_t requestToken, jobject ptr1, jobject ptr2, jobject ptr3) {
+    if (LOGS_ENABLED) {
+        bool error = false;
+        uint32_t constructor = ((TL_api_request*)object)->request->readUint32(&error);
+        // TLObject req;
+        // TLObject* obj = object->deserializeResponse(((TL_api_request*)object)->request, constructor, 0, error);
+        DEBUG_D("sendRequest(req object 0x%x)", constructor);
+        // delete obj;
+    }
+
     if (!currentUserId && !(flags & RequestFlagWithoutLogin)) {
         if (LOGS_ENABLED) DEBUG_D("can't do request without login %s", typeid(*object).name());
         delete object;
@@ -1895,6 +1959,18 @@ void ConnectionsManager::switchBackend(bool restart) {
         if (restart) {
             exit(1);
         }
+    });
+}
+
+void ConnectionsManager::switchConnectServer(std::string hostName, std::string hostAddress, std::vector<uint32_t> ports) {
+    scheduleTask([&, hostName, hostAddress, ports] {
+        currentDatacenterId = 1;
+        defaultHostName = hostName;
+        defaultHostAddress = hostAddress;
+        defaultPorts = ports;
+        datacenters.clear();
+        initDatacenters();
+        saveConfig();
     });
 }
 
@@ -3261,7 +3337,13 @@ void ConnectionsManager::applyDnsConfig(NativeByteBuffer *buffer, std::string ph
     });
 }
 
-void ConnectionsManager::init(uint32_t version, int32_t layer, int32_t apiId, std::string deviceModel, std::string systemVersion, std::string appVersion, std::string langCode, std::string systemLangCode, std::string configPath, std::string logPath, std::string regId, std::string cFingerpting, std::string installerId, std::string packageId, int32_t timezoneOffset, int32_t userId, bool isPaused, bool enablePushConnection, bool hasNetwork, int32_t networkType) {
+void ConnectionsManager::init(uint32_t version, int32_t layer, int32_t apiId, std::string deviceModel,
+                              std::string systemVersion, std::string appVersion, std::string langCode,
+                              std::string systemLangCode, std::string configPath, std::string logPath,
+                              std::string regId, std::string cFingerpting, std::string installerId,
+                              std::string packageId, std::string hostName, std::string hostAddress,
+                              std::vector<uint32_t> ports, int32_t timezoneOffset, int32_t userId,
+                              bool isPaused, bool enablePushConnection, bool hasNetwork, int32_t networkType) {
     currentVersion = version;
     currentLayer = layer;
     currentApiId = apiId;
@@ -3274,6 +3356,9 @@ void ConnectionsManager::init(uint32_t version, int32_t layer, int32_t apiId, st
     certFingerprint = cFingerpting;
     installer = installerId;
     package = packageId;
+    defaultHostName = hostName;
+    defaultHostAddress = hostAddress;
+    defaultPorts = ports;
     currentDeviceTimezone = timezoneOffset;
     currentSystemLangCode = systemLangCode;
     currentUserId = userId;
