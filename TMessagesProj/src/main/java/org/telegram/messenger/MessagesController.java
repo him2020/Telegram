@@ -762,7 +762,7 @@ public class MessagesController extends BaseController implements NotificationCe
         blockedCountry = mainPreferences.getBoolean("blockedCountry", false);
         dcDomainName = mainPreferences.getString("dcDomainName2", ConnectionsManager.native_isTestBackend(currentAccount) != 0 ? "tapv3.stel.com" : "apv3.stel.com");
         webFileDatacenterId = mainPreferences.getInt("webFileDatacenterId", ConnectionsManager.native_isTestBackend(currentAccount) != 0 ? 2 : 4);
-        suggestedLangCode = mainPreferences.getString("suggestedLangCode", "en");
+        suggestedLangCode = mainPreferences.getString("suggestedLangCode", "zh_cn");
         animatedEmojisZoom = mainPreferences.getFloat("animatedEmojisZoom", 0.625f);
         qrLoginCamera = mainPreferences.getBoolean("qrLoginCamera", false);
         saveGifsWithStickers = mainPreferences.getBoolean("saveGifsWithStickers", false);

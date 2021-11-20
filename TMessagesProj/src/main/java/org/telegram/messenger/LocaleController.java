@@ -95,6 +95,28 @@ public class LocaleController {
         }
     }
 
+    public static class ConnectServerInfo {
+        public String name;
+        public String alias;
+        public String hostName;
+        public String hostAddress;
+
+        public ConnectServerInfo(String name, String alias, String hostName, String hostAddress) {
+            this.name = name;
+            this.alias = name;
+            this.hostName = hostName;
+            this.hostAddress = hostAddress;
+        }
+
+        public boolean IsCurrentServerInfo() {
+            return hostName.equals(ConnectionsManager.getInstance(UserConfig.selectedAccount).getHostName());
+        }
+    }
+
+    public void applyConnectServer(String hostName, String hostAddress) {
+        ConnectionsManager.getInstance(UserConfig.selectedAccount).switchConnectServer(hostName, hostAddress);
+    }
+
     public static class LocaleInfo {
 
         public String name;

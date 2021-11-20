@@ -4702,4 +4702,7 @@
     <string name="ShowCaption">Show caption</string>
     <string name="HideCaption">Hide caption</string>
     <string name="TapForForwardingOptions">Tap here for forwarding options</string>
+
+    <!--connect server view-->
+    <string name="ConnectServer">Connect server</string>
 </resources>

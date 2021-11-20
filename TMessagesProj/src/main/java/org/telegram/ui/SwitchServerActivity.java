@@ -1,32 +1,275 @@
 package org.telegram.ui;
 
-import android.app.Activity;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.view.View;
-import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.ImageView.ScaleType;
-import androidx.annotation.Nullable;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
-import java.util.List;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
-import org.telegram.messenger.UserConfig;
-import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.ui.ActionBar.ActionBar;
+import org.telegram.ui.ActionBar.ActionBarMenu;
+import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.ActionBar.ThemeDescription;
+import org.telegram.ui.Cells.ConnectServerCell;
+import org.telegram.ui.Cells.LanguageCell;
+import org.telegram.ui.Cells.ShadowSectionCell;
+import org.telegram.ui.Components.EmptyTextProgressView;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.RecyclerListView;
 
-public class SwitchServerActivity extends Activity {
+public class SwitchServerActivity extends BaseFragment {
+
+    private ListAdapter listAdapter;
+    private RecyclerListView listView;
+    private EmptyTextProgressView emptyView;
+    private LocaleController.ConnectServerInfo currentServerInfo;
+
+    private ArrayList<LocaleController.ConnectServerInfo> listServerInfo;
+
+    @Override
+    public boolean onFragmentCreate() {
+        fillConnectServerInfo();
+        return super.onFragmentCreate();
+    }
+
+    @Override
+    public void onFragmentDestroy() {
+        super.onFragmentDestroy();
+    }
+
+    @Override
+    public View createView(Context context) {
+        actionBar.setBackButtonImage(R.drawable.ic_ab_back);
+        actionBar.setAllowOverlayTitle(true);
+        actionBar.setTitle(LocaleController.getString("ConnectServer", R.string.ConnectServer));
+
+        actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
+            @Override
+            public void onItemClick(int id) {
+                if (id == -1) {
+                    finishFragment();
+                } else if (id == 1) {
+                    if (currentServerInfo != null) {
+                        LocaleController.getInstance().applyConnectServer(currentServerInfo.hostName, currentServerInfo.hostAddress);
+                    }
+                    finishFragment();
+                }
+            }
+        });
+
+        ActionBarMenu menu = actionBar.createMenu();
+        menu.addItem(0, R.drawable.msg_edit);
+        menu.addItem(1, R.drawable.ic_ab_done);
+
+        listAdapter = new ListAdapter(context);
+        fragmentView = new FrameLayout(context);
+        fragmentView.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
+        FrameLayout frameLayout = (FrameLayout) fragmentView;
+
+        emptyView = new EmptyTextProgressView(context);
+        emptyView.setText(LocaleController.getString("NoResult", R.string.NoResult));
+        emptyView.showTextView();
+        emptyView.setShowAtCenter(true);
+        frameLayout.addView(emptyView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+
+        listView = new RecyclerListView(context);
+        listView.setEmptyView(emptyView);
+        listView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+        listView.setVerticalScrollBarEnabled(false);
+        listView.setAdapter(listAdapter);
+        frameLayout.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+
+        listView.setOnItemClickListener((view, position) -> {
+            if (getParentActivity() == null || parentLayout == null || !(view instanceof ConnectServerCell)) {
+                return;
+            }
+            ConnectServerCell cell = (ConnectServerCell) view;
+            LocaleController.ConnectServerInfo serverInfo = cell.getCurrentServerInfo();
+            if (serverInfo != null) {
+                currentServerInfo = serverInfo;
+                if (listAdapter != null) {
+                    listAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+
+        listView.setOnItemLongClickListener((view, position) -> {
+            if (getParentActivity() == null || parentLayout == null || !(view instanceof ConnectServerCell)) {
+                return false;
+            }
+//            LanguageCell cell = (LanguageCell) view;
+//            LocaleController.LocaleInfo localeInfo = cell.getCurrentLocale();
+//            if (localeInfo == null || localeInfo.pathToFile == null || localeInfo.isRemote() && localeInfo.serverIndex != Integer.MAX_VALUE) {
+//                return false;
+//            }
+//            final LocaleController.LocaleInfo finalLocaleInfo = localeInfo;
+//            AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+//            builder.setTitle(LocaleController.getString("DeleteLocalizationTitle", R.string.DeleteLocalizationTitle));
+//            builder.setMessage(AndroidUtilities.replaceTags(LocaleController.formatString("DeleteLocalizationText", R.string.DeleteLocalizationText, localeInfo.name)));
+//            builder.setPositiveButton(LocaleController.getString("Delete", R.string.Delete), (dialogInterface, i) -> {
+//                if (LocaleController.getInstance().deleteLanguage(finalLocaleInfo, currentAccount)) {
+//                    fillLanguages();
+//                    if (searchResult != null) {
+//                        searchResult.remove(finalLocaleInfo);
+//                    }
+//                    if (listAdapter != null) {
+//                        listAdapter.notifyDataSetChanged();
+//                    }
+//                    if (searchListViewAdapter != null) {
+//                        searchListViewAdapter.notifyDataSetChanged();
+//                    }
+//                }
+//            });
+//            builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+//            AlertDialog alertDialog = builder.create();
+//            showDialog(alertDialog);
+//            TextView button = (TextView) alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+//            if (button != null) {
+//                button.setTextColor(Theme.getColor(Theme.key_dialogTextRed2));
+//            }
+            return true;
+        });
+
+        listView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    AndroidUtilities.hideKeyboard(getParentActivity().getCurrentFocus());
+                }
+            }
+        });
+
+        return fragmentView;
+    }
+
+    private void fillConnectServerInfo() {
+        listServerInfo = new ArrayList<>();
+        listServerInfo.add(new LocaleController.ConnectServerInfo("开发", "develop", "10.191.73.183", "10.191.73.183"));
+        listServerInfo.add(new LocaleController.ConnectServerInfo("测试", "test", "10.191.80.198", "10.191.80.198"));
+        listServerInfo.add(new LocaleController.ConnectServerInfo("线上", "release", "aim.dobest.com", "180.101.193.205"));
+        for (int i=0; i < listServerInfo.size(); ++i) {
+            LocaleController.ConnectServerInfo serverInfo = listServerInfo.get(i);
+           if (serverInfo.IsCurrentServerInfo()) {
+               currentServerInfo = serverInfo;
+           }
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (listAdapter != null) {
+            listAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private class ListAdapter extends RecyclerListView.SelectionAdapter {
+
+        private Context mContext;
+
+        public ListAdapter(Context context) {
+            mContext = context;
+        }
+
+        @Override
+        public boolean isEnabled(RecyclerView.ViewHolder holder) {
+            return holder.getItemViewType() == 0;
+        }
+
+        @Override
+        public int getItemCount() {
+                int count = listServerInfo.size();
+                if (count != 0) {
+                    count++;
+                }
+                return count;
+        }
+
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view;
+            switch (viewType) {
+                case 0: {
+                    view = new ConnectServerCell(mContext, false);
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                    break;
+                }
+                case 1:
+                default: {
+                    view = new ShadowSectionCell(mContext);
+                    break;
+                }
+            }
+            return new RecyclerListView.Holder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            switch (holder.getItemViewType()) {
+                case 0: {
+                    ConnectServerCell textSettingsCell = (ConnectServerCell) holder.itemView;
+                    LocaleController.ConnectServerInfo serverInfo = listServerInfo.get(position);
+                    boolean last = position == listServerInfo.size() - 1;
+                    textSettingsCell.setServerInfo(serverInfo, String.format("%1$s (%2$s)", serverInfo.name, serverInfo.hostName), !last);
+                    textSettingsCell.setSelected(currentServerInfo == null ? false : currentServerInfo.hostName.equals(serverInfo.hostName));
+                    break;
+                }
+                case 1: {
+                    ShadowSectionCell sectionCell = (ShadowSectionCell) holder.itemView;
+                    sectionCell.setBackgroundDrawable(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
+                    break;
+                }
+            }
+        }
+
+        @Override
+        public int getItemViewType(int i) {
+            if (i == listServerInfo.size()) {
+                return 1;
+            }
+            return 0;
+        }
+    }
+
+    @Override
+    public ArrayList<ThemeDescription> getThemeDescriptions() {
+        ArrayList<ThemeDescription> themeDescriptions = new ArrayList<>();
+
+        themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{ConnectServerCell.class}, null, null, null, Theme.key_windowBackgroundWhite));
+        themeDescriptions.add(new ThemeDescription(fragmentView, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_windowBackgroundGray));
+
+        themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_actionBarDefault));
+        themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_LISTGLOWCOLOR, null, null, null, null, Theme.key_actionBarDefault));
+        themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_AB_ITEMSCOLOR, null, null, null, null, Theme.key_actionBarDefaultIcon));
+        themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_AB_TITLECOLOR, null, null, null, null, Theme.key_actionBarDefaultTitle));
+        themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_AB_SELECTORCOLOR, null, null, null, null, Theme.key_actionBarDefaultSelector));
+        themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_AB_SEARCH, null, null, null, null, Theme.key_actionBarDefaultSearch));
+        themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_AB_SEARCHPLACEHOLDER, null, null, null, null, Theme.key_actionBarDefaultSearchPlaceholder));
+
+        themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_SELECTOR, null, null, null, null, Theme.key_listSelector));
+
+        themeDescriptions.add(new ThemeDescription(emptyView, ThemeDescription.FLAG_TEXTCOLOR, null, null, null, null, Theme.key_emptyListPlaceholder));
+
+        themeDescriptions.add(new ThemeDescription(listView, 0, new Class[]{View.class}, Theme.dividerPaint, null, null, Theme.key_divider));
+
+        themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_BACKGROUNDFILTER, new Class[]{ShadowSectionCell.class}, null, null, null, Theme.key_windowBackgroundGrayShadow));
+
+        themeDescriptions.add(new ThemeDescription(listView, 0, new Class[]{ConnectServerCell.class}, new String[]{"textView"}, null, null, null, Theme.key_windowBackgroundWhiteBlackText));
+        themeDescriptions.add(new ThemeDescription(listView, 0, new Class[]{ConnectServerCell.class}, new String[]{"textView2"}, null, null, null, Theme.key_windowBackgroundWhiteGrayText3));
+        themeDescriptions.add(new ThemeDescription(listView, 0, new Class[]{ConnectServerCell.class}, new String[]{"checkImage"}, null, null, null, Theme.key_featuredStickers_addedIcon));
+
+        return themeDescriptions;
+    }
+}
+
+/**
+public class SwitchServerActivity2 extends Activity {
     private SwitchServerBean currentServerBean;
     private String currentHostName;
 
@@ -108,4 +351,5 @@ public class SwitchServerActivity extends Activity {
         return serverBeans;
     }
 }
+*/
 

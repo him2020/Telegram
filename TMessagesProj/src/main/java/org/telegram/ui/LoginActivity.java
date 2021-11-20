@@ -145,6 +145,7 @@ public class LoginActivity extends BaseFragment {
     private int currentDoneType;
     private AnimatorSet[] showDoneAnimation = new AnimatorSet[2];
     private ActionBarMenuItem doneItem;
+    private ActionBarMenuItem serverItem;
     private AnimatorSet doneItemAnimation;
     private ContextProgressView doneProgressView;
     private ImageView floatingButtonIcon;
@@ -157,6 +158,7 @@ public class LoginActivity extends BaseFragment {
     private static final int DONE_TYPE_ACTION = 1;
 
     private final static int done_button = 1;
+    private final static int server_button = 2;
 
     private boolean needRequestPermissions;
 
@@ -255,6 +257,8 @@ public class LoginActivity extends BaseFragment {
             public void onItemClick(int id) {
                 if (id == done_button) {
                     onDoneButtonPressed();
+                } else if (id == server_button) {
+                    presentFragment(new SwitchServerActivity());
                 } else if (id == -1) {
                     if (onBackPressed()) {
                         finishFragment();
@@ -281,6 +285,9 @@ public class LoginActivity extends BaseFragment {
         doneItem.addView(doneProgressView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         doneItem.setContentDescription(LocaleController.getString("Done", R.string.Done));
         doneItem.setVisibility(doneButtonVisible[DONE_TYPE_ACTION] ? View.VISIBLE : View.GONE);
+        serverItem = menu.addItem(server_button, R.drawable.menu_settings);
+        serverItem.setContentDescription(LocaleController.getString("ConnectServer", R.string.ConnectServer));
+        // serverItem.addView(doneProgressView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
 
         FrameLayout container = new FrameLayout(context) {
             @Override
@@ -1471,10 +1478,11 @@ public class LoginActivity extends BaseFragment {
             String country = null;
 
             try {
-                TelephonyManager telephonyManager = (TelephonyManager) ApplicationLoader.applicationContext.getSystemService(Context.TELEPHONY_SERVICE);
-                if (telephonyManager != null) {
-                    country = null;//telephonyManager.getSimCountryIso().toUpperCase();
-                }
+                // TelephonyManager telephonyManager = (TelephonyManager) ApplicationLoader.applicationContext.getSystemService(Context.TELEPHONY_SERVICE);
+                // if (telephonyManager != null) {
+                //    country = null; // telephonyManager.getSimCountryIso().toUpperCase();
+                //}
+                country = getResources().getConfiguration().locale.getCountry().toUpperCase();
             } catch (Exception e) {
                 FileLog.e(e);
             }
@@ -1772,21 +1780,26 @@ public class LoginActivity extends BaseFragment {
                         String textToSet = null;
                         boolean ok = false;
                         if (!TextUtils.isEmpty(number)) {
-                            if (number.length() > 4) {
-                                for (int a = 4; a >= 1; a--) {
-                                    String sub = number.substring(0, a);
-                                    String country = codesMap.get(sub);
-                                    if (country != null) {
-                                        ok = true;
-                                        textToSet = number.substring(a);
-                                        codeField.setText(sub);
-                                        break;
-                                    }
-                                }
-                                if (!ok) {
-                                    textToSet = number.substring(1);
-                                    codeField.setText(number.substring(0, 1));
-                                }
+                            if (codeField.length() == 0) {
+                                // codeField.setTest("")
+//                                if (number.length() > 4) {
+//                                    for (int a = 4; a >= 1; a--) {
+//                                        String sub = number.substring(0, a);
+//                                        String country = codesMap.get(sub);
+//                                        if (country != null) {
+//                                            ok = true;
+//                                            textToSet = number.substring(a);
+//                                            codeField.setText(sub);
+//                                            break;
+//                                        }
+//                                    }
+//                                    if (!ok) {
+//                                        textToSet = number.substring(1);
+//                                        codeField.setText(number.substring(0, 1));
+//                                    }
+//                                }
+                            } else {
+                                textToSet = number;
                             }
                             if (textToSet != null) {
                                 phoneField.requestFocus();
