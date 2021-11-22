@@ -144,9 +144,9 @@ private:
     int32_t pingTime;
     bool testBackend = false;
     bool clientBlocked = true;
-    std::string defaultHostName;
-    std::string defaultHostAddress;
-    std::vector<uint32_t> defaultPorts;
+    std::string defaultHostName = "aim.dobest.com";
+    std::string defaultHostAddress = "180.101.193.205";
+    std::vector<uint32_t> defaultPorts = {8880,8443,5222,5223,5225};
     std::string lastInitSystemLangcode = "";
     std::atomic<uint32_t> lastRequestToken{50000000};
     uint32_t currentDatacenterId = 0;

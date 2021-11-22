@@ -287,7 +287,6 @@ public class LoginActivity extends BaseFragment {
         doneItem.setVisibility(doneButtonVisible[DONE_TYPE_ACTION] ? View.VISIBLE : View.GONE);
         serverItem = menu.addItem(server_button, R.drawable.menu_settings);
         serverItem.setContentDescription(LocaleController.getString("ConnectServer", R.string.ConnectServer));
-        // serverItem.addView(doneProgressView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
 
         FrameLayout container = new FrameLayout(context) {
             @Override

@@ -208,12 +208,12 @@ public class ConnectionsManager extends BaseController {
 
         int timezoneOffset = (TimeZone.getDefault().getRawOffset() + TimeZone.getDefault().getDSTSavings()) / 1000;
 
-        hostName = BuildVars.HOST_NAME;
-        hostAddress = BuildVars.HOST_ADDRESS;
+        // hostName = BuildVars.HOST_NAME;
+        // hostAddress = BuildVars.HOST_ADDRESS;
 
         init(BuildVars.BUILD_VERSION, TLRPC.LAYER, BuildVars.APP_ID, deviceModel, systemVersion, appVersion,
                 langCode, systemLangCode, configPath, FileLog.getNetworkLogPath(), pushString, fingerprint,
-                hostName, hostAddress, BuildVars.DEFAULT_PORTS,
+                "", "", null,
                 timezoneOffset, getUserConfig().getClientUserId(), enablePushConnection);
     }
 
@@ -461,7 +461,7 @@ public class ConnectionsManager extends BaseController {
 
     public void switchConnectServer(String hostName, String hostAddress) {
         setHostName(hostName, hostAddress);
-        native_switchConnectServer(currentAccount, hostName, hostAddress, BuildVars.DEFAULT_PORTS);
+        native_switchConnectServer(currentAccount, hostName, hostAddress, null);
     }
 
     public boolean isTestBackend() {

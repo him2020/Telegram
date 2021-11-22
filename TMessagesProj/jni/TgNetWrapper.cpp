@@ -203,14 +203,16 @@ void switchConnectServer(JNIEnv *env, jclass c, jint instanceNum, jstring hostNa
     const char *hostNameStr = env->GetStringUTFChars(hostName, 0);
     const char *hostAddressStr = env->GetStringUTFChars(hostAddress, 0);
     std::vector<uint32_t> hostPorts;
-    jboolean isCopy = 0;
-    jint* portsArray = env->GetIntArrayElements(ports, &isCopy);
-    if (portsArray != 0) {
-        jint len = env->GetArrayLength(ports);
-        for (int i=0; i<len; i ++) {
-            hostPorts.push_back(portsArray[i]);
+    if (ports != nullptr) {
+        jboolean isCopy = 0;
+        jint *portsArray = env->GetIntArrayElements(ports, &isCopy);
+        if (portsArray != 0) {
+            jint len = env->GetArrayLength(ports);
+            for (int i = 0; i < len; i++) {
+                hostPorts.push_back(portsArray[i]);
+            }
+            env->ReleaseIntArrayElements(ports, portsArray, 0);
         }
-        env->ReleaseIntArrayElements(ports, portsArray, 0);
     }
 
     ConnectionsManager::getInstance(instanceNum).switchConnectServer(std::string(hostNameStr), std::string(hostAddressStr), hostPorts);
@@ -424,14 +426,16 @@ void init(JNIEnv *env, jclass c, jint instanceNum, jint version, jint layer, jin
     const char *packageIdStr = env->GetStringUTFChars(packageId, 0);
 
     std::vector<uint32_t> hostPorts;
-    jboolean isCopy = 0;
-    jint* portsArray = env->GetIntArrayElements(ports, &isCopy);
-    if (portsArray != 0) {
-        jint len = env->GetArrayLength(ports);
-        for (int i=0; i<len; i ++) {
-            hostPorts.push_back(portsArray[i]);
+    if (ports != nullptr) {
+        jboolean isCopy = 0;
+        jint *portsArray = env->GetIntArrayElements(ports, &isCopy);
+        if (portsArray != 0) {
+            jint len = env->GetArrayLength(ports);
+            for (int i = 0; i < len; i++) {
+                hostPorts.push_back(portsArray[i]);
+            }
+            env->ReleaseIntArrayElements(ports, portsArray, 0);
         }
-        env->ReleaseIntArrayElements(ports, portsArray, 0);
     }
     ConnectionsManager::getInstance(instanceNum).init(
             (uint32_t) version, layer, apiId, std::string(deviceModelStr), std::string(systemVersionStr),

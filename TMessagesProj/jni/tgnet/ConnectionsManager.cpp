@@ -401,15 +401,16 @@ void ConnectionsManager::loadConfig() {
                     datacenters[datacenter->getDatacenterId()] = datacenter;
                     if (LOGS_ENABLED) DEBUG_D("datacenter(%p) %u loaded (hasAuthKey = %d, 0x%" PRIx64 ")", datacenter, datacenter->getDatacenterId(), (int) datacenter->hasPermanentAuthKey(), datacenter->getPermanentAuthKeyId());
                 }
-                scheduleTask([&] {
-                    if (delegate != nullptr) {
-                        delegate->onBindHostName(defaultHostName, defaultHostAddress, instanceNum);
-                    }
-                });
             }
         }
         buffer->reuse();
     }
+
+    scheduleTask([&] {
+        if (delegate != nullptr) {
+            delegate->onBindHostName(defaultHostName, defaultHostAddress, instanceNum);
+        }
+    });
 
     if (currentDatacenterId != 0 && currentUserId) {
         Datacenter *datacenter = getDatacenterWithId(currentDatacenterId);
@@ -1964,13 +1965,25 @@ void ConnectionsManager::switchBackend(bool restart) {
 
 void ConnectionsManager::switchConnectServer(std::string hostName, std::string hostAddress, std::vector<uint32_t> ports) {
     scheduleTask([&, hostName, hostAddress, ports] {
-        currentDatacenterId = 1;
-        defaultHostName = hostName;
-        defaultHostAddress = hostAddress;
-        defaultPorts = ports;
-        datacenters.clear();
-        initDatacenters();
-        saveConfig();
+        bool changed = false;
+        if (!hostName.empty()) {
+            defaultHostName = hostName;
+            changed = true;
+        }
+        if (!hostAddress.empty()) {
+            defaultHostAddress = hostAddress;
+            changed = true;
+        }
+        if (!ports.empty()) {
+            defaultPorts = ports;
+            changed = true;
+        }
+        if (changed) {
+            currentDatacenterId = 1;
+            datacenters.clear();
+            initDatacenters();
+            saveConfig();
+        }
     });
 }
 
@@ -3356,9 +3369,15 @@ void ConnectionsManager::init(uint32_t version, int32_t layer, int32_t apiId, st
     certFingerprint = cFingerpting;
     installer = installerId;
     package = packageId;
-    defaultHostName = hostName;
-    defaultHostAddress = hostAddress;
-    defaultPorts = ports;
+    if (!hostName.empty()) {
+        defaultHostName = hostName;
+    }
+    if (!hostAddress.empty()) {
+        defaultHostAddress = hostAddress;
+    }
+    if (!ports.empty()) {
+        defaultPorts = ports;
+    }
     currentDeviceTimezone = timezoneOffset;
     currentSystemLangCode = systemLangCode;
     currentUserId = userId;

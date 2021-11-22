@@ -4704,5 +4704,6 @@
     <string name="TapForForwardingOptions">Tap here for forwarding options</string>
 
     <!--connect server view-->
-    <string name="ConnectServer">Connect server</string>
+    <string name="ConnectServer">Choose Connect Server</string>
+    <string name="EditConnectServer">Please input ip or domain</string>
 </resources>

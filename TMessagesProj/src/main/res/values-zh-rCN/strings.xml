@@ -4961,7 +4961,7 @@
   <string name="CancelForwardMessage">Do you want to cancel forwarding or to forward messages to a different chat?</string>
   <string name="NotificationMessageGroupPoll">%1$s sent a poll to the group %2$s</string>
   <string name="WidgetPasscode">​\n\nNote: Your passcode will be **ignored** for widgets.</string>
-
-    <!--connect server view-->
-    <string name="ConnectServer">连接服务器</string>
+  <!--connect server view-->
+  <string name="ConnectServer">选择连接服务器</string>
+  <string name="EditConnectServer">请输入服务器IP或域名</string>
 </resources>

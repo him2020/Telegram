@@ -109,12 +109,20 @@ public class LocaleController {
         }
 
         public boolean IsCurrentServerInfo() {
-            return hostName.equals(ConnectionsManager.getInstance(UserConfig.selectedAccount).getHostName());
+            return hostName.equals(getCurrentHostName());
         }
     }
 
-    public void applyConnectServer(String hostName, String hostAddress) {
+    public static void applyConnectServer(String hostName, String hostAddress) {
         ConnectionsManager.getInstance(UserConfig.selectedAccount).switchConnectServer(hostName, hostAddress);
+    }
+
+    public static String getCurrentHostName() {
+        return ConnectionsManager.getInstance(UserConfig.selectedAccount).getHostName();
+    }
+
+    public static String getCurrentHostAddress() {
+        return ConnectionsManager.getInstance(UserConfig.selectedAccount).getHostAddress();
     }
 
     public static class LocaleInfo {
