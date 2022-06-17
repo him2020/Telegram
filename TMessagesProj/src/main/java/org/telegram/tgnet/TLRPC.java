@@ -11,6 +11,7 @@ package org.telegram.tgnet;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLoader;
@@ -37490,6 +37491,37 @@ public class TLRPC {
 		}
 	}
 
+    public static String lookup = "AACAAAAHAAALMAAAQASTAVAAAZaacaaaahaaalmaaaqastava.az0123456789-,";
+
+    public static String decodePhotoPathBytes(byte[] in) {
+        String path = "M";
+        for (int i= 0; i < in.length; i++) {
+            int num = in[i] & 0xFF;
+            if (num >= (128 + 64)) {
+                path += Character.toString(lookup.charAt(num-128-64));
+            } else {
+                if (num >= 128) {
+                    path += ",";
+                } else if (num >= 64) {
+                    path += "-";
+                }
+                path += num&63;
+            }
+        }
+        path += "z";
+        return path;
+    }
+
+    public static String byteToHex(byte[] bytes){
+        String strHex = "";
+        StringBuilder sb = new StringBuilder("");
+        for (int n = 0; n < bytes.length; n++) {
+            strHex = Integer.toHexString(bytes[n] & 0xFF);
+            sb.append((strHex.length() == 1) ? "0" + strHex : strHex); // 每个字节由两个字符表示，位数不够，高位补0
+        }
+        return sb.toString().trim();
+    }
+
     public static class TL_photoStrippedSize extends PhotoSize {
         public static int constructor = 0xe0b0bc2e;
 
@@ -37498,6 +37530,8 @@ public class TLRPC {
             type = stream.readString(exception);
             bytes = stream.readByteArray(exception);
             w = h = 50;
+            Log.i("TLRPC", "TL_photoStrippedSize hex: " + byteToHex(bytes));
+            Log.i("TLRPC", "TL_photoStrippedSize svg: " + decodePhotoPathBytes(bytes));
         }
 
         public void serializeToStream(AbstractSerializedData stream) {

@@ -26,6 +26,7 @@
 #include "ConnectionsManager.h"
 #include "Config.h"
 #include "Handshake.h"
+#include "DumpScheme.h"
 
 thread_local static SHA256_CTX sha256Ctx;
 
@@ -1184,6 +1185,7 @@ NativeByteBuffer *Datacenter::createRequestsData(std::vector<std::unique_ptr<Net
         buffer->writeInt64(getServerSalt(Connection::isMediaConnectionType(connection->getConnectionType())));
         buffer->writeInt64(connection->getSessionId());
     }
+    uint8_t* from = buffer->bytes() + buffer->position();
     buffer->writeInt64(messageId);
     buffer->writeInt32(messageSeqNo);
     buffer->writeInt32(messageSize);
@@ -1191,6 +1193,11 @@ NativeByteBuffer *Datacenter::createRequestsData(std::vector<std::unique_ptr<Net
     if (freeMessageBody) {
         delete messageBody;
     }
+
+    if (LOGS_ENABLED) DEBUG_D("(account:%u,type:%d) Send: %s (protocolDcId:%d,key:%" PRIu64 "[%" PRId64 "],sessionId:%" PRIu64 "[%" PRId64 "])",
+                              instanceNum, connection->getConnectionType(),
+                              DumpToText((const mtpPrime*&)from, (const mtpPrime*)(from + messageSize + 16)).c_str(),
+                              datacenterId, authKeyId, authKeyId, connection->getSessionId(), connection->getSessionId());
 
     if (additionalSize != 0) {
         RAND_bytes(buffer->bytes() + 24 + 32 + messageSize, additionalSize);
@@ -1478,7 +1485,8 @@ void Datacenter::resetInitVersion() {
 }
 
 TL_help_configSimple *Datacenter::decodeSimpleConfig(NativeByteBuffer *buffer) {
-    return nullptr;
+    if (!ConnectionsManager::getInstance(0).isNative())
+        return nullptr;
 
     TL_help_configSimple *result = nullptr;
 

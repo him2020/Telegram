@@ -47,6 +47,7 @@ public:
     int32_t getCurrentTime();
     uint32_t getCurrentDatacenterId();
     bool isTestBackend();
+    bool isNative();
     int32_t getTimeDifference();
     int32_t sendRequest(TLObject *object, onCompleteFunc onComplete, onQuickAckFunc onQuickAck, uint32_t flags, uint32_t datacenterId, ConnectionType connetionType, bool immediate);
     int32_t sendRequest(TLObject *object, onCompleteFunc onComplete, onQuickAckFunc onQuickAck, uint32_t flags, uint32_t datacenterId, ConnectionType connetionType, bool immediate, int32_t requestToken);

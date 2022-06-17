@@ -60,6 +60,9 @@ void Handshake::beginHandshake(bool reconnect) {
     request->nonce = std::make_unique<ByteArray>(16);
     RAND_bytes(request->nonce->bytes, 16);
     authNonce = new ByteArray(request->nonce.get());
+    if (LOGS_ENABLED) DEBUG_D("handshake auth_nonce: %s request_nonce: %s",
+                              FileLog::BytesToHexString(authNonce->bytes, authNonce->length).c_str(),
+                              FileLog::BytesToHexString(request->nonce.get()->bytes, request->nonce.get()->length).c_str());
     sendRequestData(request, true);
 }
 
@@ -346,45 +349,50 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
                 }
             } else {
                 if (serverPublicKeys.empty()) {
-                    if (ConnectionsManager::getInstance(currentDatacenter->instanceNum).testBackend) {
-//                        serverPublicKeys.emplace_back("-----BEGIN RSA PUBLIC KEY-----\n"
-//                                                      "MIIBCgKCAQEAyMEdY1aR+sCR3ZSJrtztKTKqigvO/vBfqACJLZtS7QMgCGXJ6XIR\n"
-//                                                      "yy7mx66W0/sOFa7/1mAZtEoIokDP3ShoqF4fVNb6XeqgQfaUHd8wJpDWHcR2OFwv\n"
-//                                                      "plUUI1PLTktZ9uW2WE23b+ixNwJjJGwBDJPQEQFBE+vfmH0JP503wr5INS1poWg/\n"
-//                                                      "j25sIWeYPHYeOrFp/eXaqhISP6G+q2IeTaWTXpwZj4LzXq5YOpk4bYEQ6mvRq7D1\n"
-//                                                      "aHWfYmlEGepfaYR8Q0YqvvhYtMte3ITnuSJs171+GDqpdKcSwHnd6FudwGO4pcCO\n"
-//                                                      "j4WcDuXc2CTHgH8gFTNhp/Y8/SpDOhvn9QIDAQAB\n"
-//                                                      "-----END RSA PUBLIC KEY-----");
-//                        serverPublicKeysFingerprints.push_back(0xb25898df208d2603);
-                        serverPublicKeys.emplace_back("-----BEGIN RSA PUBLIC KEY-----\n"
-                                                      "MIIBCgKCAQEAxMbm90HlrrNRayczDL/hQVpHc3HIFVFOxie3mfq9vwn51SVxZZC7\n"
-                                                      "2+1pLFDnnFKaWX+yReUopLFqw8wOrjJg4Wsar7V9zZr8h/cdzPDimvwahEJ/wkFy\n"
-                                                      "CEThg8qwWsICbutDpeIEDv5HVirQpWGmRG5DBKbkQrlCjdfA7yfAMuGfBGN3xJ6B\n"
-                                                      "JYEBWGvN7wQJUVlUTuLAA3w+tA67dpPzmmbCTMPnpTm6V8KDJCsA7mzBsIPFT8NU\n"
-                                                      "McIute4prCmyi22pszvQISPOkWcOYmEmCTSoN03mBCkHgJiff3OCPF9y8qXWE4Pj\n"
-                                                      "0P2vOvZQGM1jBaKrUutz/l7ya2VbgMxRCQIDAQAB\n"
-                                                      "-----END RSA PUBLIC KEY-----");
-                        serverPublicKeysFingerprints.push_back(0x8a2ff29f8ea48042);
+                    if (ConnectionsManager::getInstance(currentDatacenter->instanceNum).isNative()) {
+                        if (ConnectionsManager::getInstance(currentDatacenter->instanceNum).testBackend) {
+                            serverPublicKeys.emplace_back("-----BEGIN RSA PUBLIC KEY-----\n"
+                                                          "MIIBCgKCAQEAyMEdY1aR+sCR3ZSJrtztKTKqigvO/vBfqACJLZtS7QMgCGXJ6XIR\n"
+                                                          "yy7mx66W0/sOFa7/1mAZtEoIokDP3ShoqF4fVNb6XeqgQfaUHd8wJpDWHcR2OFwv\n"
+                                                          "plUUI1PLTktZ9uW2WE23b+ixNwJjJGwBDJPQEQFBE+vfmH0JP503wr5INS1poWg/\n"
+                                                          "j25sIWeYPHYeOrFp/eXaqhISP6G+q2IeTaWTXpwZj4LzXq5YOpk4bYEQ6mvRq7D1\n"
+                                                          "aHWfYmlEGepfaYR8Q0YqvvhYtMte3ITnuSJs171+GDqpdKcSwHnd6FudwGO4pcCO\n"
+                                                          "j4WcDuXc2CTHgH8gFTNhp/Y8/SpDOhvn9QIDAQAB\n"
+                                                          "-----END RSA PUBLIC KEY-----");
+                            serverPublicKeysFingerprints.push_back(0xb25898df208d2603);
+                        } else {
+                            serverPublicKeys.emplace_back("-----BEGIN RSA PUBLIC KEY-----\n"
+                                                          "MIIBCgKCAQEA6LszBcC1LGzyr992NzE0ieY+BSaOW622Aa9Bd4ZHLl+TuFQ4lo4g\n"
+                                                          "5nKaMBwK/BIb9xUfg0Q29/2mgIR6Zr9krM7HjuIcCzFvDtr+L0GQjae9H0pRB2OO\n"
+                                                          "62cECs5HKhT5DZ98K33vmWiLowc621dQuwKWSQKjWf50XYFw42h21P2KXUGyp2y/\n"
+                                                          "+aEyZ+uVgLLQbRA1dEjSDZ2iGRy12Mk5gpYc397aYp438fsJoHIgJ2lgMv5h7WY9\n"
+                                                          "t6N/byY9Nw9p21Og3AoXSL2q/2IJ1WRUhebgAdGVMlV1fkuOQoEzR7EdpqtQD9Cs\n"
+                                                          "5+bfo3Nhmcyvk5ftB0WkJ9z6bNZ7yxrP8wIDAQAB\n"
+                                                          "-----END RSA PUBLIC KEY-----");
+                            serverPublicKeysFingerprints.push_back(0xd09d1d85de64fd85);
+                        }
                     } else {
-//                        serverPublicKeys.emplace_back("-----BEGIN RSA PUBLIC KEY-----\n"
-//                                                      "MIIBCgKCAQEA6LszBcC1LGzyr992NzE0ieY+BSaOW622Aa9Bd4ZHLl+TuFQ4lo4g\n"
-//                                                      "5nKaMBwK/BIb9xUfg0Q29/2mgIR6Zr9krM7HjuIcCzFvDtr+L0GQjae9H0pRB2OO\n"
-//                                                      "62cECs5HKhT5DZ98K33vmWiLowc621dQuwKWSQKjWf50XYFw42h21P2KXUGyp2y/\n"
-//                                                      "+aEyZ+uVgLLQbRA1dEjSDZ2iGRy12Mk5gpYc397aYp438fsJoHIgJ2lgMv5h7WY9\n"
-//                                                      "t6N/byY9Nw9p21Og3AoXSL2q/2IJ1WRUhebgAdGVMlV1fkuOQoEzR7EdpqtQD9Cs\n"
-//                                                      "5+bfo3Nhmcyvk5ftB0WkJ9z6bNZ7yxrP8wIDAQAB\n"
-//                                                      "-----END RSA PUBLIC KEY-----");
-//                        serverPublicKeysFingerprints.push_back(0xd09d1d85de64fd85);
-                        serverPublicKeys.emplace_back("-----BEGIN RSA PUBLIC KEY-----\n"
-                                                      "MIIBCgKCAQEAxMbm90HlrrNRayczDL/hQVpHc3HIFVFOxie3mfq9vwn51SVxZZC7\n"
-                                                      "2+1pLFDnnFKaWX+yReUopLFqw8wOrjJg4Wsar7V9zZr8h/cdzPDimvwahEJ/wkFy\n"
-                                                      "CEThg8qwWsICbutDpeIEDv5HVirQpWGmRG5DBKbkQrlCjdfA7yfAMuGfBGN3xJ6B\n"
-                                                      "JYEBWGvN7wQJUVlUTuLAA3w+tA67dpPzmmbCTMPnpTm6V8KDJCsA7mzBsIPFT8NU\n"
-                                                      "McIute4prCmyi22pszvQISPOkWcOYmEmCTSoN03mBCkHgJiff3OCPF9y8qXWE4Pj\n"
-                                                      "0P2vOvZQGM1jBaKrUutz/l7ya2VbgMxRCQIDAQAB\n"
-                                                      "-----END RSA PUBLIC KEY-----");
-                        // serverPublicKeysFingerprints.push_back(0xc605674d92638003);
-                        serverPublicKeysFingerprints.push_back(0x8a2ff29f8ea48042);
+                        if (ConnectionsManager::getInstance(currentDatacenter->instanceNum).testBackend) {
+                            serverPublicKeys.emplace_back("-----BEGIN RSA PUBLIC KEY-----\n"
+                                                          "MIIBCgKCAQEAxMbm90HlrrNRayczDL/hQVpHc3HIFVFOxie3mfq9vwn51SVxZZC7\n"
+                                                          "2+1pLFDnnFKaWX+yReUopLFqw8wOrjJg4Wsar7V9zZr8h/cdzPDimvwahEJ/wkFy\n"
+                                                          "CEThg8qwWsICbutDpeIEDv5HVirQpWGmRG5DBKbkQrlCjdfA7yfAMuGfBGN3xJ6B\n"
+                                                          "JYEBWGvN7wQJUVlUTuLAA3w+tA67dpPzmmbCTMPnpTm6V8KDJCsA7mzBsIPFT8NU\n"
+                                                          "McIute4prCmyi22pszvQISPOkWcOYmEmCTSoN03mBCkHgJiff3OCPF9y8qXWE4Pj\n"
+                                                          "0P2vOvZQGM1jBaKrUutz/l7ya2VbgMxRCQIDAQAB\n"
+                                                          "-----END RSA PUBLIC KEY-----");
+                            serverPublicKeysFingerprints.push_back(0x8a2ff29f8ea48042);
+                        } else {
+                            serverPublicKeys.emplace_back("-----BEGIN RSA PUBLIC KEY-----\n"
+                                                          "MIIBCgKCAQEAxMbm90HlrrNRayczDL/hQVpHc3HIFVFOxie3mfq9vwn51SVxZZC7\n"
+                                                          "2+1pLFDnnFKaWX+yReUopLFqw8wOrjJg4Wsar7V9zZr8h/cdzPDimvwahEJ/wkFy\n"
+                                                          "CEThg8qwWsICbutDpeIEDv5HVirQpWGmRG5DBKbkQrlCjdfA7yfAMuGfBGN3xJ6B\n"
+                                                          "JYEBWGvN7wQJUVlUTuLAA3w+tA67dpPzmmbCTMPnpTm6V8KDJCsA7mzBsIPFT8NU\n"
+                                                          "McIute4prCmyi22pszvQISPOkWcOYmEmCTSoN03mBCkHgJiff3OCPF9y8qXWE4Pj\n"
+                                                          "0P2vOvZQGM1jBaKrUutz/l7ya2VbgMxRCQIDAQAB\n"
+                                                          "-----END RSA PUBLIC KEY-----");
+                            serverPublicKeysFingerprints.push_back(0x8a2ff29f8ea48042);
+                        }
                     }
                 }
 
@@ -651,7 +659,10 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
             sendAckRequest(messageId);
             sendRequestData(request, true);
         } else {
-            if (LOGS_ENABLED) DEBUG_E("account%u dc%u handshake: invalid client nonce, type = %d", currentDatacenter->instanceNum, currentDatacenter->datacenterId, handshakeType);
+            if (LOGS_ENABLED) DEBUG_E("account%u dc%u handshake: invalid client nonce, type = %d auth_nonce = %s result_nonce = %s",
+                                      currentDatacenter->instanceNum, currentDatacenter->datacenterId, handshakeType,
+                                      FileLog::BytesToHexString(authNonce->bytes, authNonce->length).c_str(),
+                                      FileLog::BytesToHexString(result->nonce.get()->bytes, result->nonce.get()->length).c_str());
             beginHandshake(false);
         }
     } else if (dynamic_cast<Server_DH_Params *>(message)) {

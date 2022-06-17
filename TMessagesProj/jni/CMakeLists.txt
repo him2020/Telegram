@@ -183,6 +183,7 @@ add_library(tgnet STATIC
         tgnet/FileLog.cpp
         tgnet/MTProtoScheme.cpp
         tgnet/NativeByteBuffer.cpp
+        tgnet/DumpScheme.cpp
         tgnet/Request.cpp
         tgnet/Timer.cpp
         tgnet/TLObject.cpp

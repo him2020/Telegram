@@ -1198,7 +1198,7 @@ public class FileLoadOperation {
                         GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream(cacheFileTemp));
                         FileLoader.copyFile(gzipInputStream, cacheFileGzipTemp, 1024 * 1024 * 2);
                         gzipInputStream.close();
-                        cacheFileTemp.delete();
+                        // cacheFileTemp.delete();
                         cacheFileTemp = cacheFileGzipTemp;
                         ungzip = false;
                     } catch (ZipException zipException) {

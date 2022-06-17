@@ -2078,7 +2078,7 @@ public class ContactsController extends BaseController {
         builder.withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0);
         builder.withValue(ContactsContract.Data.MIMETYPE, "vnd.android.cursor.item/vnd.org.telegram.messenger.android.profile");
         builder.withValue(ContactsContract.Data.DATA1, user.id);
-        builder.withValue(ContactsContract.Data.DATA2, "Telegram Profile");
+        builder.withValue(ContactsContract.Data.DATA2, "TMessager Profile");
         builder.withValue(ContactsContract.Data.DATA3, LocaleController.formatString("ContactShortcutMessage", R.string.ContactShortcutMessage, phoneOrName));
         builder.withValue(ContactsContract.Data.DATA4, user.id);
         query.add(builder.build());
@@ -2087,7 +2087,7 @@ public class ContactsController extends BaseController {
         builder.withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0);
         builder.withValue(ContactsContract.Data.MIMETYPE, "vnd.android.cursor.item/vnd.org.telegram.messenger.android.call");
         builder.withValue(ContactsContract.Data.DATA1, user.id);
-        builder.withValue(ContactsContract.Data.DATA2, "Telegram Voice Call");
+        builder.withValue(ContactsContract.Data.DATA2, "TMessager Voice Call");
         builder.withValue(ContactsContract.Data.DATA3, LocaleController.formatString("ContactShortcutVoiceCall", R.string.ContactShortcutVoiceCall, phoneOrName));
         builder.withValue(ContactsContract.Data.DATA4, user.id);
         query.add(builder.build());
@@ -2096,7 +2096,7 @@ public class ContactsController extends BaseController {
         builder.withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0);
         builder.withValue(ContactsContract.Data.MIMETYPE, "vnd.android.cursor.item/vnd.org.telegram.messenger.android.call.video");
         builder.withValue(ContactsContract.Data.DATA1, user.id);
-        builder.withValue(ContactsContract.Data.DATA2, "Telegram Video Call");
+        builder.withValue(ContactsContract.Data.DATA2, "TMessager Video Call");
         builder.withValue(ContactsContract.Data.DATA3, LocaleController.formatString("ContactShortcutVideoCall", R.string.ContactShortcutVideoCall, phoneOrName));
         builder.withValue(ContactsContract.Data.DATA4, user.id);
         query.add(builder.build());

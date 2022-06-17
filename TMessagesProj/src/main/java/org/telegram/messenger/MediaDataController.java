@@ -1490,6 +1490,23 @@ public class MediaDataController extends BaseController {
                     putDiceStickersToCache(name, res, date);
                 }
                 AndroidUtilities.runOnUIThread(() -> {
+                    for (int b = 0; b < res.documents.size(); b++) {
+                        TLRPC.Document document = res.documents.get(b);
+                        getFileLoader().loadFile(document, null, 0, 0);
+
+                        for (int i=0; i < document.thumbs.size(); i++) {
+                            TLRPC.PhotoSize photoSize =  document.thumbs.get(i);
+                            if (photoSize instanceof TLRPC.TL_photoSize) {
+                                if (photoSize.location == null) {
+                                    photoSize.location = new TLRPC.TL_fileLocationToBeDeprecated();
+                                    photoSize.location.volume_id = -document.id;
+                                    photoSize.location.local_id = 1000 + photoSize.type.charAt(0);
+                                }
+                                ImageLocation imageLocation = ImageLocation.getForDocument(photoSize, document);
+                                getFileLoader().loadFile(imageLocation, null, "jpg",0, 0);
+                            }
+                        }
+                    }
                     diceStickerSetsByEmoji.put(name, res);
                     diceEmojiStickerSetsById.put(res.set.id, name);
                     getNotificationCenter().postNotificationName(NotificationCenter.diceStickersDidLoad, name);

@@ -20,6 +20,7 @@ public:
     static void d(const char *message, ...) __attribute__((format (printf, 1, 2)));
 
     static std::string BytesToHexString(uint8_t* bytes, uint32_t len);
+    static std::string BytesToHexString(uint8_t* bytes, uint32_t len, char sep);
     static FileLog &getInstance();
 
 

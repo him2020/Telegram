@@ -75,6 +75,7 @@ public class SwitchServerActivity extends BaseFragment {
                             listServerInfo.add(new LocaleController.ConnectServerInfo("开发", "develop", txt, txt));
                             if (listAdapter != null) {
                                 listAdapter.notifyDataSetChanged();
+                                menu.closeSearchField(true);
                             }
                         }
                     }
@@ -128,7 +129,7 @@ public class SwitchServerActivity extends BaseFragment {
 
     private void fillConnectServerInfo() {
         listServerInfo = new ArrayList<>();
-        // listServerInfo.add(new LocaleController.ConnectServerInfo("开发", "develop", "10.191.73.183", "10.191.73.183"));
+        listServerInfo.add(new LocaleController.ConnectServerInfo("官方", "official", "native", "native"));
         listServerInfo.add(new LocaleController.ConnectServerInfo("线上", "release", "aim.dobest.com", "180.101.193.205"));
         listServerInfo.add(new LocaleController.ConnectServerInfo("测试", "test", "10.191.80.198", "10.191.80.198"));
         boolean selected = false;

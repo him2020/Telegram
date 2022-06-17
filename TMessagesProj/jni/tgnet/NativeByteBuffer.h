@@ -40,6 +40,9 @@ public:
     void skip(uint32_t length);
     void clearCapacity();
     uint8_t *bytes();
+    uint8_t *data();
+    uint32_t size();
+
 
     void writeInt32(int32_t x, bool *error);
     void writeInt64(int64_t x, bool *error);

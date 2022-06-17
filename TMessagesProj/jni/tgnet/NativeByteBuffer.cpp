@@ -128,6 +128,14 @@ uint8_t *NativeByteBuffer::bytes() {
     return buffer;
 }
 
+uint8_t *NativeByteBuffer::data() {
+    return buffer;
+}
+
+uint32_t NativeByteBuffer::size() {
+    return _position;
+}
+
 void NativeByteBuffer::rewind() {
     _position = 0;
 }

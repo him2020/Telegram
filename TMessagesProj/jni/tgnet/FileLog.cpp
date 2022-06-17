@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <time.h>
+#include "base/assertion.h"
 #include "FileLog.h"
 #include "ConnectionsManager.h"
 
@@ -44,6 +45,19 @@ std::string FileLog::BytesToHexString(uint8_t* bytes, uint32_t len) {
     result.resize(len << 1);
     for (uint32_t i =0; i<len; ++i) {
         sprintf((char*)result.c_str() + (i << 1), "%02x", bytes[i]);
+    }
+    return result;
+}
+
+std::string FileLog::BytesToHexString(uint8_t* bytes, uint32_t len, char sep) {
+    std::string result;
+    result.resize(len << 1);
+    for (uint32_t i =0; i<len; ++i) {
+        if (sep != 0) {
+            sprintf((char*)result.c_str() + (i << 1), "%02x%c", bytes[i], sep);
+        } else {
+            sprintf((char*)result.c_str() + (i << 1), "%02x", bytes[i]);
+        }
     }
     return result;
 }

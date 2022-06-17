@@ -32,6 +32,7 @@
 #include "ByteArray.h"
 #include "Config.h"
 #include "ProxyCheckInfo.h"
+#include "DumpScheme.h"
 
 #ifdef ANDROID
 #include <jni.h>
@@ -585,6 +586,10 @@ bool ConnectionsManager::isTestBackend() {
     return testBackend;
 }
 
+bool ConnectionsManager::isNative() {
+    return defaultHostName == "native";
+}
+
 int32_t ConnectionsManager::getTimeDifference() {
     return timeDifference;
 }
@@ -926,9 +931,15 @@ void ConnectionsManager::onConnectionDataReceived(Connection *connection, Native
             return;
         }
 
+        uint8_t* from = data->bytes() + data->position();
         int64_t messageId = data->readInt64(&error);
         int32_t messageSeqNo = data->readInt32(&error);
         uint32_t messageLength = data->readUint32(&error);
+
+        if (LOGS_ENABLED) DEBUG_D("(account:%u,type:%d) Recv: %s (protocolDcId:%d,key:%" PRIu64 "[%" PRId64 "],sessionId:%" PRIu64 "[%" PRId64 "])",
+                                  instanceNum, connection->getConnectionType(),
+                                  DumpToText((const mtpPrime*&)from, (const mtpPrime*)(from + messageLength + 16)).c_str(),
+                                  datacenter->getDatacenterId(), keyId, keyId, connection->getSessionId(), connection->getSessionId());
 
         int32_t processedStatus = connection->isMessageIdProcessed(messageId);
 
@@ -937,7 +948,6 @@ void ConnectionsManager::onConnectionDataReceived(Connection *connection, Native
         }
 
         TLObject *object = nullptr;
-
         if (processedStatus != 1) {
             deserializingDatacenter = datacenter;
             object = TLdeserialize(nullptr, messageLength, data);
@@ -1704,92 +1714,96 @@ void ConnectionsManager::initDatacenters() {
 //    }
 //    const uint32_t ports[] = {8880,8443,5222,5223,5225};
 
-    int num = 0;
-    int maxNum = defaultPorts.size();
-    std::vector<std::string> ips = hostNameToIp(defaultHostName);
-    if (ips.empty()) {
-        ips.push_back(defaultHostAddress);
-    }
-    for (auto & ip : ips) {
-        ++num;
-        if (datacenters.find(num) == datacenters.end()) {
-            Datacenter* datacenter = new Datacenter(instanceNum, num);
-            datacenter->addAddressAndPort(ip, defaultPorts[num-1], 0, "");
-            datacenters[num] = datacenter;
+    if (!isNative()) {
+        int num = 0;
+        int maxNum = defaultPorts.size();
+        std::vector<std::string> ips = hostNameToIp(defaultHostName);
+        if (ips.empty()) {
+            ips.push_back(defaultHostAddress);
         }
-        if (num >= maxNum) {
-            break;
-        };
-    }
+        for (auto &ip : ips) {
+            ++num;
+            if (datacenters.find(num) == datacenters.end()) {
+                Datacenter *datacenter = new Datacenter(instanceNum, num);
+                datacenter->addAddressAndPort(ip, defaultPorts[num - 1], 0, "");
+                datacenters[num] = datacenter;
+            }
+            if (num >= maxNum) {
+                break;
+            };
+        }
 
-    if (num < maxNum) {
-        for (int i=num+1; i <= maxNum; i++) {
-            if (datacenters.find(i) == datacenters.end()) {
-                Datacenter* datacenter = new Datacenter(instanceNum, i);
-                datacenter->addAddressAndPort(ips[0], defaultPorts[i-1], 0, "");
-                datacenters[i] = datacenter;
+        if (num < maxNum) {
+            for (int i = num + 1; i <= maxNum; i++) {
+                if (datacenters.find(i) == datacenters.end()) {
+                    Datacenter *datacenter = new Datacenter(instanceNum, i);
+                    datacenter->addAddressAndPort(ips[0], defaultPorts[i - 1], 0, "");
+                    datacenters[i] = datacenter;
+                }
             }
         }
+        return;
     }
 
-//    Datacenter *datacenter;
-//    if (!testBackend) {
-//        if (datacenters.find(1) == datacenters.end()) {
-//            datacenter = new Datacenter(instanceNum, 1);
-//            datacenter->addAddressAndPort("149.154.175.50", 443, 0, "");
-//            datacenter->addAddressAndPort("2001:b28:f23d:f001:0000:0000:0000:000a", 443, 1, "");
-//            datacenters[1] = datacenter;
-//        }
-//
-//        if (datacenters.find(2) == datacenters.end()) {
-//            datacenter = new Datacenter(instanceNum, 2);
-//            datacenter->addAddressAndPort("149.154.167.51", 443, 0, "");
-//            datacenter->addAddressAndPort("95.161.76.100", 443, 0, "");
-//            datacenter->addAddressAndPort("2001:67c:4e8:f002:0000:0000:0000:000a", 443, 1, "");
-//            datacenters[2] = datacenter;
-//        }
-//
-//        if (datacenters.find(3) == datacenters.end()) {
-//            datacenter = new Datacenter(instanceNum, 3);
-//            datacenter->addAddressAndPort("149.154.175.100", 443, 0, "");
-//            datacenter->addAddressAndPort("2001:b28:f23d:f003:0000:0000:0000:000a", 443, 1, "");
-//            datacenters[3] = datacenter;
-//        }
-//
-//        if (datacenters.find(4) == datacenters.end()) {
-//            datacenter = new Datacenter(instanceNum, 4);
-//            datacenter->addAddressAndPort("149.154.167.91", 443, 0, "");
-//            datacenter->addAddressAndPort("2001:67c:4e8:f004:0000:0000:0000:000a", 443, 1, "");
-//            datacenters[4] = datacenter;
-//        }
-//
-//        if (datacenters.find(5) == datacenters.end()) {
-//            datacenter = new Datacenter(instanceNum, 5);
-//            datacenter->addAddressAndPort("149.154.171.5", 443, 0, "");
-//            datacenter->addAddressAndPort("2001:b28:f23f:f005:0000:0000:0000:000a", 443, 1, "");
-//            datacenters[5] = datacenter;
-//        }
-//    } else {
-//        if (datacenters.find(1) == datacenters.end()) {
-//            datacenter = new Datacenter(instanceNum, 1);
-//            datacenter->addAddressAndPort("149.154.175.40", 443, 0, "");
-//            datacenter->addAddressAndPort("2001:b28:f23d:f001:0000:0000:0000:000e", 443, 1, "");
-//            datacenters[1] = datacenter;
-//        }
-//
-//        if (datacenters.find(2) == datacenters.end()) {
-//            datacenter = new Datacenter(instanceNum, 2);
-//            datacenter->addAddressAndPort("149.154.167.40", 443, 0, "");
-//            datacenter->addAddressAndPort("2001:67c:4e8:f002:0000:0000:0000:000e", 443, 1, "");
-//            datacenters[2] = datacenter;
-//        }
-//
-//        if (datacenters.find(3) == datacenters.end()) {
-//            datacenter = new Datacenter(instanceNum, 3);
-//            datacenter->addAddressAndPort("149.154.175.117", 443, 0, "");
-//            datacenter->addAddressAndPort("2001:b28:f23d:f003:0000:0000:0000:000e", 443, 1, "");
-//            datacenters[3] = datacenter;
-//        }
+    Datacenter *datacenter;
+    if (!testBackend) {
+        if (datacenters.find(1) == datacenters.end()) {
+            datacenter = new Datacenter(instanceNum, 1);
+            datacenter->addAddressAndPort("149.154.175.50", 443, 0, "");
+            datacenter->addAddressAndPort("2001:b28:f23d:f001:0000:0000:0000:000a", 443, 1, "");
+            datacenters[1] = datacenter;
+        }
+
+        if (datacenters.find(2) == datacenters.end()) {
+            datacenter = new Datacenter(instanceNum, 2);
+            datacenter->addAddressAndPort("149.154.167.51", 443, 0, "");
+            datacenter->addAddressAndPort("95.161.76.100", 443, 0, "");
+            datacenter->addAddressAndPort("2001:67c:4e8:f002:0000:0000:0000:000a", 443, 1, "");
+            datacenters[2] = datacenter;
+        }
+
+        if (datacenters.find(3) == datacenters.end()) {
+            datacenter = new Datacenter(instanceNum, 3);
+            datacenter->addAddressAndPort("149.154.175.100", 443, 0, "");
+            datacenter->addAddressAndPort("2001:b28:f23d:f003:0000:0000:0000:000a", 443, 1, "");
+            datacenters[3] = datacenter;
+        }
+
+        if (datacenters.find(4) == datacenters.end()) {
+            datacenter = new Datacenter(instanceNum, 4);
+            datacenter->addAddressAndPort("149.154.167.91", 443, 0, "");
+            datacenter->addAddressAndPort("2001:67c:4e8:f004:0000:0000:0000:000a", 443, 1, "");
+            datacenters[4] = datacenter;
+        }
+
+        if (datacenters.find(5) == datacenters.end()) {
+            datacenter = new Datacenter(instanceNum, 5);
+            datacenter->addAddressAndPort("149.154.171.5", 443, 0, "");
+            datacenter->addAddressAndPort("2001:b28:f23f:f005:0000:0000:0000:000a", 443, 1, "");
+            datacenters[5] = datacenter;
+        }
+    } else {
+        if (datacenters.find(1) == datacenters.end()) {
+            datacenter = new Datacenter(instanceNum, 1);
+            datacenter->addAddressAndPort("149.154.175.40", 443, 0, "");
+            datacenter->addAddressAndPort("2001:b28:f23d:f001:0000:0000:0000:000e", 443, 1, "");
+            datacenters[1] = datacenter;
+        }
+
+        if (datacenters.find(2) == datacenters.end()) {
+            datacenter = new Datacenter(instanceNum, 2);
+            datacenter->addAddressAndPort("149.154.167.40", 443, 0, "");
+            datacenter->addAddressAndPort("2001:67c:4e8:f002:0000:0000:0000:000e", 443, 1, "");
+            datacenters[2] = datacenter;
+        }
+
+        if (datacenters.find(3) == datacenters.end()) {
+            datacenter = new Datacenter(instanceNum, 3);
+            datacenter->addAddressAndPort("149.154.175.117", 443, 0, "");
+            datacenter->addAddressAndPort("2001:b28:f23d:f003:0000:0000:0000:000e", 443, 1, "");
+            datacenters[3] = datacenter;
+        }
+    }
 }
 
 void ConnectionsManager::attachConnection(ConnectionSocket *connection) {
@@ -1966,11 +1980,11 @@ void ConnectionsManager::switchBackend(bool restart) {
 void ConnectionsManager::switchConnectServer(std::string hostName, std::string hostAddress, std::vector<uint32_t> ports) {
     scheduleTask([&, hostName, hostAddress, ports] {
         bool changed = false;
-        if (!hostName.empty()) {
+        if (!hostName.empty() && defaultHostName != hostName) {
             defaultHostName = hostName;
             changed = true;
         }
-        if (!hostAddress.empty()) {
+        if (!hostAddress.empty() && defaultHostAddress != hostAddress) {
             defaultHostAddress = hostAddress;
             changed = true;
         }
