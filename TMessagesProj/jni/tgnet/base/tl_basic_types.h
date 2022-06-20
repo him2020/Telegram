@@ -64,6 +64,7 @@ enum {
 
 	id_bytes = id_string,
 	id_flags = id_int,
+	id_flags64 = id_long,
 };
 
 class int_type {

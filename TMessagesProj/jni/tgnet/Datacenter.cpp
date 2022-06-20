@@ -26,7 +26,7 @@
 #include "ConnectionsManager.h"
 #include "Config.h"
 #include "Handshake.h"
-#include "DumpScheme.h"
+#include "base/scheme_dump.h"
 
 thread_local static SHA256_CTX sha256Ctx;
 
@@ -1273,6 +1273,10 @@ bool Datacenter::hasPermanentAuthKey() {
 
 int64_t Datacenter::getPermanentAuthKeyId() {
     return authKeyPermId;
+}
+
+int64_t Datacenter::getTempAuthKeyId() {
+    return authKeyTempId;
 }
 
 bool Datacenter::hasAuthKey(ConnectionType connectionType, int32_t allowPendingKey) {

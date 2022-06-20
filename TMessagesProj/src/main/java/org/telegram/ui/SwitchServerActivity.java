@@ -130,8 +130,11 @@ public class SwitchServerActivity extends BaseFragment {
     private void fillConnectServerInfo() {
         listServerInfo = new ArrayList<>();
         listServerInfo.add(new LocaleController.ConnectServerInfo("官方", "official", "native", "native"));
-        listServerInfo.add(new LocaleController.ConnectServerInfo("线上", "release", "aim.dobest.com", "180.101.193.205"));
-        listServerInfo.add(new LocaleController.ConnectServerInfo("测试", "test", "10.191.80.198", "10.191.80.198"));
+        listServerInfo.add(new LocaleController.ConnectServerInfo("线上", "release", "am.zhimagame.net", "183.136.166.246"));
+        listServerInfo.add(new LocaleController.ConnectServerInfo("测试1", "test1", "10.191.80.198", "10.191.80.198"));
+        listServerInfo.add(new LocaleController.ConnectServerInfo("测试2", "test2", "10.191.80.197", "10.191.80.197"));
+        listServerInfo.add(new LocaleController.ConnectServerInfo("开发1", "dev1", "10.191.73.184", "10.191.73.184"));
+        listServerInfo.add(new LocaleController.ConnectServerInfo("开发2", "dev2", "10.191.73.183", "10.191.73.183"));
         boolean selected = false;
         for (int i=0; i < listServerInfo.size(); ++i) {
             LocaleController.ConnectServerInfo serverInfo = listServerInfo.get(i);

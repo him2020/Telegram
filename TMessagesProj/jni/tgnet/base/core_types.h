@@ -8,20 +8,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #pragma once
 
 #include <vector>
+#include "types.h"
 #include "flags.h"
 #include "tl_basic_types.h"
 
-
-using mtpPrime = int32_t;
-using mtpRequestId = int32_t;
-using mtpMsgId = uint64_t;
-using mtpPingId = uint64_t;
-
 using mtpBuffer = std::vector<mtpPrime>;
-using mtpTypeId = uint32_t;
-
-using Types = std::vector<mtpTypeId>;
-using StagesFlags = std::vector<int32_t>;
 
 namespace MTP {
 
@@ -57,65 +48,66 @@ constexpr int GetDcIdShift(ShiftedDcId shiftedDcId) {
 } // namespace MTP
 
 enum {
-	// core types
-	mtpc_int = tl::id_int,
-	mtpc_long = tl::id_long,
-	mtpc_int128 = tl::id_int128,
-	mtpc_int256 = tl::id_int256,
-	mtpc_double = tl::id_double,
-	mtpc_string = tl::id_string,
-	mtpc_vector = tl::id_vector,
-	mtpc_bytes = tl::id_bytes,
-	mtpc_flags = tl::id_flags,
+    // core types
+    mtpc_int = tl::id_int,
+    mtpc_long = tl::id_long,
+    mtpc_int128 = tl::id_int128,
+    mtpc_int256 = tl::id_int256,
+    mtpc_double = tl::id_double,
+    mtpc_string = tl::id_string,
+    mtpc_vector = tl::id_vector,
+    mtpc_bytes = tl::id_bytes,
+    mtpc_flags = tl::id_flags,
+    mtpc_flags64 = tl::id_flags64,
 
-	// layers
-	mtpc_invokeWithLayer1 = 0x53835315,
-	mtpc_invokeWithLayer2 = 0x289dd1f6,
-	mtpc_invokeWithLayer3 = 0xb7475268,
-	mtpc_invokeWithLayer4 = 0xdea0d430,
-	mtpc_invokeWithLayer5 = 0x417a57ae,
-	mtpc_invokeWithLayer6 = 0x3a64d54d,
-	mtpc_invokeWithLayer7 = 0xa5be56d3,
-	mtpc_invokeWithLayer8 = 0xe9abd9fd,
-	mtpc_invokeWithLayer9 = 0x76715a63,
-	mtpc_invokeWithLayer10 = 0x39620c41,
-	mtpc_invokeWithLayer11 = 0xa6b88fdf,
-	mtpc_invokeWithLayer12 = 0xdda60d3c,
-	mtpc_invokeWithLayer13 = 0x427c8ea2,
-	mtpc_invokeWithLayer14 = 0x2b9b08fa,
-	mtpc_invokeWithLayer15 = 0xb4418b64,
-	mtpc_invokeWithLayer16 = 0xcf5f0987,
-	mtpc_invokeWithLayer17 = 0x50858a19,
-	mtpc_invokeWithLayer18 = 0x1c900537,
+    // layers
+    mtpc_invokeWithLayer1 = 0x53835315,
+    mtpc_invokeWithLayer2 = 0x289dd1f6,
+    mtpc_invokeWithLayer3 = 0xb7475268,
+    mtpc_invokeWithLayer4 = 0xdea0d430,
+    mtpc_invokeWithLayer5 = 0x417a57ae,
+    mtpc_invokeWithLayer6 = 0x3a64d54d,
+    mtpc_invokeWithLayer7 = 0xa5be56d3,
+    mtpc_invokeWithLayer8 = 0xe9abd9fd,
+    mtpc_invokeWithLayer9 = 0x76715a63,
+    mtpc_invokeWithLayer10 = 0x39620c41,
+    mtpc_invokeWithLayer11 = 0xa6b88fdf,
+    mtpc_invokeWithLayer12 = 0xdda60d3c,
+    mtpc_invokeWithLayer13 = 0x427c8ea2,
+    mtpc_invokeWithLayer14 = 0x2b9b08fa,
+    mtpc_invokeWithLayer15 = 0xb4418b64,
+    mtpc_invokeWithLayer16 = 0xcf5f0987,
+    mtpc_invokeWithLayer17 = 0x50858a19,
+    mtpc_invokeWithLayer18 = 0x1c900537,
 
-	// manually parsed
-	mtpc_rpc_result = 0xf35c6d01,
-	mtpc_msg_container = 0x73f1f8dc,
+    // manually parsed
+    mtpc_rpc_result = 0xf35c6d01,
+    mtpc_msg_container = 0x73f1f8dc,
 //	mtpc_msg_copy = 0xe06046b2,
-	mtpc_gzip_packed = 0x3072cfa1
+    mtpc_gzip_packed = 0x3072cfa1
 };
 static const mtpTypeId mtpc_core_message = -1; // undefined type, but is used
 static const mtpTypeId mtpLayers[] = {
-	mtpTypeId(mtpc_invokeWithLayer1),
-	mtpTypeId(mtpc_invokeWithLayer2),
-	mtpTypeId(mtpc_invokeWithLayer3),
-	mtpTypeId(mtpc_invokeWithLayer4),
-	mtpTypeId(mtpc_invokeWithLayer5),
-	mtpTypeId(mtpc_invokeWithLayer6),
-	mtpTypeId(mtpc_invokeWithLayer7),
-	mtpTypeId(mtpc_invokeWithLayer8),
-	mtpTypeId(mtpc_invokeWithLayer9),
-	mtpTypeId(mtpc_invokeWithLayer10),
-	mtpTypeId(mtpc_invokeWithLayer11),
-	mtpTypeId(mtpc_invokeWithLayer12),
-	mtpTypeId(mtpc_invokeWithLayer13),
-	mtpTypeId(mtpc_invokeWithLayer14),
-	mtpTypeId(mtpc_invokeWithLayer15),
-	mtpTypeId(mtpc_invokeWithLayer16),
-	mtpTypeId(mtpc_invokeWithLayer17),
-	mtpTypeId(mtpc_invokeWithLayer18),
+        mtpTypeId(mtpc_invokeWithLayer1),
+        mtpTypeId(mtpc_invokeWithLayer2),
+        mtpTypeId(mtpc_invokeWithLayer3),
+        mtpTypeId(mtpc_invokeWithLayer4),
+        mtpTypeId(mtpc_invokeWithLayer5),
+        mtpTypeId(mtpc_invokeWithLayer6),
+        mtpTypeId(mtpc_invokeWithLayer7),
+        mtpTypeId(mtpc_invokeWithLayer8),
+        mtpTypeId(mtpc_invokeWithLayer9),
+        mtpTypeId(mtpc_invokeWithLayer10),
+        mtpTypeId(mtpc_invokeWithLayer11),
+        mtpTypeId(mtpc_invokeWithLayer12),
+        mtpTypeId(mtpc_invokeWithLayer13),
+        mtpTypeId(mtpc_invokeWithLayer14),
+        mtpTypeId(mtpc_invokeWithLayer15),
+        mtpTypeId(mtpc_invokeWithLayer16),
+        mtpTypeId(mtpc_invokeWithLayer17),
+        mtpTypeId(mtpc_invokeWithLayer18),
 };
-static const uint32_t mtpLayerMaxSingle = sizeof(mtpLayers) / sizeof(mtpLayers[0]);
+static const uint32 mtpLayerMaxSingle = sizeof(mtpLayers) / sizeof(mtpLayers[0]);
 
 using MTPint = tl::int_type;
 

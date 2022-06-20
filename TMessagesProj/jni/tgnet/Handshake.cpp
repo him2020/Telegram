@@ -61,8 +61,8 @@ void Handshake::beginHandshake(bool reconnect) {
     RAND_bytes(request->nonce->bytes, 16);
     authNonce = new ByteArray(request->nonce.get());
     if (LOGS_ENABLED) DEBUG_D("handshake auth_nonce: %s request_nonce: %s",
-                              FileLog::BytesToHexString(authNonce->bytes, authNonce->length).c_str(),
-                              FileLog::BytesToHexString(request->nonce.get()->bytes, request->nonce.get()->length).c_str());
+                              DEBUG_H(authNonce->bytes, authNonce->length).c_str(),
+                              DEBUG_H(request->nonce.get()->bytes, request->nonce.get()->length).c_str());
     sendRequestData(request, true);
 }
 
@@ -517,9 +517,9 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
 
             if (LOGS_ENABLED) {
                 uint32_t len = innerDataBuffer->limit() / 3;
-                DEBUG_E("init data of DH: %s", FileLog::BytesToHexString(innerDataBuffer->bytes(), len).c_str());
-                DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len, len).c_str());
-                DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
+                DEBUG_E("init data of DH: %s", DEBUG_H(innerDataBuffer->bytes(), len).c_str());
+                DEBUG_E("%s", DEBUG_H(innerDataBuffer->bytes() + len, len).c_str());
+                DEBUG_E("%s", DEBUG_H(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
             }
 
             BIO *keyBio = BIO_new(BIO_s_mem());
@@ -534,9 +534,9 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
                 }
                 if (LOGS_ENABLED) {
                     uint32_t len = innerDataBuffer->limit() / 3;
-                    DEBUG_E("rand data of DH: %s", FileLog::BytesToHexString(innerDataBuffer->bytes(), len).c_str());
-                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len, len).c_str());
-                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
+                    DEBUG_E("rand data of DH: %s", DEBUG_H(innerDataBuffer->bytes(), len).c_str());
+                    DEBUG_E("%s", DEBUG_H(innerDataBuffer->bytes() + len, len).c_str());
+                    DEBUG_E("%s", DEBUG_H(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
                 }
                 RAND_bytes(innerDataBuffer->bytes(), keySize);
                 SHA256_CTX sha256Ctx;
@@ -548,17 +548,17 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
                 memset(innerDataBuffer->bytes() + encryptedDataSize + paddedDataSize, 0, ivSize);
                 if (LOGS_ENABLED) {
                     uint32_t len = innerDataBuffer->limit() / 3;
-                    DEBUG_E("sha data of DH: %s", FileLog::BytesToHexString(innerDataBuffer->bytes(), len).c_str());
-                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len, len).c_str());
-                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
+                    DEBUG_E("sha data of DH: %s", DEBUG_H(innerDataBuffer->bytes(), len).c_str());
+                    DEBUG_E("%s", DEBUG_H(innerDataBuffer->bytes() + len, len).c_str());
+                    DEBUG_E("%s", DEBUG_H(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
                 }
                 Datacenter::aesIgeEncryption(innerDataBuffer->bytes() + keySize, innerDataBuffer->bytes(), innerDataBuffer->bytes() + encryptedDataSize + paddedDataSize, true, true, paddedDataSize + SHA256_DIGEST_LENGTH);
 
                 if (LOGS_ENABLED) {
                     uint32_t len = innerDataBuffer->limit() / 3;
-                    DEBUG_E("aes data of DH: %s", FileLog::BytesToHexString(innerDataBuffer->bytes(), len).c_str());
-                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len, len).c_str());
-                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
+                    DEBUG_E("aes data of DH: %s", DEBUG_H(innerDataBuffer->bytes(), len).c_str());
+                    DEBUG_E("%s", DEBUG_H(innerDataBuffer->bytes() + len, len).c_str());
+                    DEBUG_E("%s", DEBUG_H(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
                 }
 
                 SHA256_Init(&sha256Ctx);
@@ -567,9 +567,9 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
 
                 if (LOGS_ENABLED) {
                     uint32_t len = innerDataBuffer->limit() / 3;
-                    DEBUG_E("two sha data of DH: %s", FileLog::BytesToHexString(innerDataBuffer->bytes(), len).c_str());
-                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len, len).c_str());
-                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
+                    DEBUG_E("two sha data of DH: %s", DEBUG_H(innerDataBuffer->bytes(), len).c_str());
+                    DEBUG_E("%s", DEBUG_H(innerDataBuffer->bytes() + len, len).c_str());
+                    DEBUG_E("%s", DEBUG_H(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
                 }
 
                 for (uint32_t i = 0; i < keySize; i++) {
@@ -578,9 +578,9 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
 
                 if (LOGS_ENABLED) {
                     uint32_t len = innerDataBuffer->limit() / 3;
-                    DEBUG_E("encrypted data of DH: %s", FileLog::BytesToHexString(innerDataBuffer->bytes(), len).c_str());
-                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len, len).c_str());
-                    DEBUG_E("%s", FileLog::BytesToHexString(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
+                    DEBUG_E("encrypted data of DH: %s", DEBUG_H(innerDataBuffer->bytes(), len).c_str());
+                    DEBUG_E("%s", DEBUG_H(innerDataBuffer->bytes() + len, len).c_str());
+                    DEBUG_E("%s", DEBUG_H(innerDataBuffer->bytes() + len + len, innerDataBuffer->limit() - len - len).c_str());
                 }
                 bool ok = false;
                 uint32_t offset = encryptedDataSize + paddedDataSize + ivSize + SHA256_DIGEST_LENGTH;
@@ -603,7 +603,7 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
             }
 
             if (LOGS_ENABLED) {
-                DEBUG_E("encrypted data of DH: %s", FileLog::BytesToHexString(innerDataBuffer->bytes(), encryptedDataSize).c_str());
+                DEBUG_E("encrypted data of DH: %s", DEBUG_H(innerDataBuffer->bytes(), encryptedDataSize).c_str());
             }
 
             // 解码测试
@@ -625,9 +625,9 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
 
                 if (LOGS_ENABLED) {
                     uint32_t len = dBuf->limit() / 3;
-                    DEBUG_E("decrypted data of DH: %s", FileLog::BytesToHexString(dBuf->bytes(), len).c_str());
-                    DEBUG_E("%s", FileLog::BytesToHexString(dBuf->bytes() + len, len).c_str());
-                    DEBUG_E("%s", FileLog::BytesToHexString(dBuf->bytes() + len + len, dBuf->limit() - len - len).c_str());
+                    DEBUG_E("decrypted data of DH: %s", DEBUG_H(dBuf->bytes(), len).c_str());
+                    DEBUG_E("%s", DEBUG_H(dBuf->bytes() + len, len).c_str());
+                    DEBUG_E("%s", DEBUG_H(dBuf->bytes() + len + len, dBuf->limit() - len - len).c_str());
                 }
                 dBuf->reuse();
             }
@@ -653,7 +653,7 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
             request->encrypted_data = std::unique_ptr<ByteArray>(rsaEncryptedData);
 
             if (LOGS_ENABLED) {
-                DEBUG_E("rsa encrypted data of DH: %s", FileLog::BytesToHexString(request->encrypted_data->bytes, request->encrypted_data->length).c_str());
+                DEBUG_E("rsa encrypted data of DH: %s", DEBUG_H(request->encrypted_data->bytes, request->encrypted_data->length).c_str());
             }
 
             sendAckRequest(messageId);
@@ -661,8 +661,8 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
         } else {
             if (LOGS_ENABLED) DEBUG_E("account%u dc%u handshake: invalid client nonce, type = %d auth_nonce = %s result_nonce = %s",
                                       currentDatacenter->instanceNum, currentDatacenter->datacenterId, handshakeType,
-                                      FileLog::BytesToHexString(authNonce->bytes, authNonce->length).c_str(),
-                                      FileLog::BytesToHexString(result->nonce.get()->bytes, result->nonce.get()->length).c_str());
+                                      DEBUG_H(authNonce->bytes, authNonce->length).c_str(),
+                                      DEBUG_H(result->nonce.get()->bytes, result->nonce.get()->length).c_str());
             beginHandshake(false);
         }
     } else if (dynamic_cast<Server_DH_Params *>(message)) {

@@ -19,9 +19,15 @@
 
 #ifdef DEBUG_VERSION
 bool LOGS_ENABLED = true;
+bool NETWORK_LOGS_ENABLED = true;
 #else
-bool LOGS_ENABLED = true;
+bool LOGS_ENABLED = false;
+bool NETWORK_LOGS_ENABLED = false;
 #endif
+
+static void log(const char *message, const char *file, int line) {
+    if (LOGS_ENABLED) DEBUG_D("%s %s %d", message, file, line);
+}
 
 FileLog &FileLog::getInstance() {
     static FileLog instance;
@@ -30,6 +36,7 @@ FileLog &FileLog::getInstance() {
 
 FileLog::FileLog() {
     pthread_mutex_init(&mutex, NULL);
+    base::assertion::init(log);
 }
 
 void FileLog::init(std::string path) {
@@ -40,23 +47,48 @@ void FileLog::init(std::string path) {
     pthread_mutex_unlock(&mutex);
 }
 
-std::string FileLog::BytesToHexString(uint8_t* bytes, uint32_t len) {
-    std::string result;
-    result.resize(len << 1);
-    for (uint32_t i =0; i<len; ++i) {
-        sprintf((char*)result.c_str() + (i << 1), "%02x", bytes[i]);
+void FileLog::close() {
+    pthread_mutex_lock(&mutex);
+    if (logFile != nullptr) {
+        fclose(logFile);
+        logFile = nullptr;
     }
-    return result;
+    pthread_mutex_unlock(&mutex);
 }
 
-std::string FileLog::BytesToHexString(uint8_t* bytes, uint32_t len, char sep) {
+void FileLog::reset(std::string path) {
+    pthread_mutex_lock(&mutex);
+    if (logFile != nullptr) {
+        fclose(logFile);
+        logFile = nullptr;
+    }
+    if (path.size() > 0) {
+        logFile = fopen(path.c_str(), "w");
+    }
+    pthread_mutex_unlock(&mutex);
+}
+
+std::string FileLog::h(uint8_t* bytes, uint32_t len, char sep) {
+    static const char* hexChar = "0123456789ABCDEF";
     std::string result;
-    result.resize(len << 1);
-    for (uint32_t i =0; i<len; ++i) {
+    if (len > 0) {
         if (sep != 0) {
-            sprintf((char*)result.c_str() + (i << 1), "%02x%c", bytes[i], sep);
+            result.resize(len * 3 - 1);
+            char *data = (char *)result.data();
+            *data++ = hexChar[(bytes[0] >> 4) & 0x0F];
+            *data++ = hexChar[bytes[0] & 0x0F];
+            for (uint32_t i = 1; i < len; ++i) {
+                *data++ = sep;
+                *data++ = hexChar[(bytes[i] >> 4) & 0x0F];
+                *data++ = hexChar[bytes[i] & 0x0F];
+            }
         } else {
-            sprintf((char*)result.c_str() + (i << 1), "%02x", bytes[i]);
+            result.resize(len << 1);
+            char *data = (char *)result.data();
+            for (uint32_t i = 0; i < len; ++i) {
+                *data++ = hexChar[(bytes[i] >> 4) & 0x0F];
+                *data++ = hexChar[bytes[i] & 0x0F];
+            }
         }
     }
     return result;

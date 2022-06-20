@@ -32,7 +32,7 @@
 #include "ByteArray.h"
 #include "Config.h"
 #include "ProxyCheckInfo.h"
-#include "DumpScheme.h"
+#include "base/scheme_dump.h"
 
 #ifdef ANDROID
 #include <jni.h>
@@ -400,7 +400,11 @@ void ConnectionsManager::loadConfig() {
                 for (uint32_t a = 0; a < count; a++) {
                     auto datacenter = new Datacenter(instanceNum, buffer);
                     datacenters[datacenter->getDatacenterId()] = datacenter;
-                    if (LOGS_ENABLED) DEBUG_D("datacenter(%p) %u loaded (hasAuthKey = %d, 0x%" PRIx64 ")", datacenter, datacenter->getDatacenterId(), (int) datacenter->hasPermanentAuthKey(), datacenter->getPermanentAuthKeyId());
+                    if (LOGS_ENABLED) DEBUG_D("datacenter(%p) %u loaded (hasAuthKey = %d, 0x%" PRIx64 " tempAuthKey=0x%" PRIx64 ")",
+                                              datacenter, datacenter->getDatacenterId(),
+                                              (int) datacenter->hasPermanentAuthKey(),
+                                              datacenter->getPermanentAuthKeyId(),
+                                              datacenter->getTempAuthKeyId());
                 }
             }
         }

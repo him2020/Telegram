@@ -15,12 +15,13 @@ class FileLog {
 public:
     FileLog();
     void init(std::string path);
+    void close();
+    void reset(std::string path);
     static void e(const char *message, ...) __attribute__((format (printf, 1, 2)));
     static void w(const char *message, ...) __attribute__((format (printf, 1, 2)));
     static void d(const char *message, ...) __attribute__((format (printf, 1, 2)));
 
-    static std::string BytesToHexString(uint8_t* bytes, uint32_t len);
-    static std::string BytesToHexString(uint8_t* bytes, uint32_t len, char sep);
+    static std::string h(uint8_t* bytes, uint32_t len, char sep = 0);
     static FileLog &getInstance();
 
 
@@ -30,9 +31,11 @@ private:
 };
 
 extern bool LOGS_ENABLED;
+extern bool NETWORK_LOGS_ENABLED;
 
 #define DEBUG_E FileLog::getInstance().e
 #define DEBUG_W FileLog::getInstance().w
 #define DEBUG_D FileLog::getInstance().d
+#define DEBUG_H FileLog::h
 
 #endif

@@ -476,6 +476,11 @@
         <meta-data android:name="android.max_aspect" android:value="2.5" />
 
         <meta-data android:name="com.google.android.actions" android:resource="@xml/actions" />
+        <activity
+            android:name="org.telegram.ui.SwitchServerActivity"
+            android:launchMode="singleTask"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"
+            android:theme="@style/Theme.TMessages.Start"/>
     </application>
 
 </manifest>

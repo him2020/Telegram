@@ -145,8 +145,8 @@ private:
     int32_t pingTime;
     bool testBackend = false;
     bool clientBlocked = true;
-    std::string defaultHostName = "aim.dobest.com";
-    std::string defaultHostAddress = "180.101.193.205";
+    std::string defaultHostName = "am.zhimagame.net";
+    std::string defaultHostAddress = "183.136.166.246";
     std::vector<uint32_t> defaultPorts = {8880,8443,5222,5223,5225};
     std::string lastInitSystemLangcode = "";
     std::atomic<uint32_t> lastRequestToken{50000000};

@@ -8,7 +8,8 @@
 
 namespace base {
     namespace assertion {
-        void log(const char *message, const char *file, int line);
+        typedef void(* assert_log)(const char *message, const char *file, int line);
+        static assert_log _log = nullptr;
 // Release build assertions.
         inline constexpr void noop() {
         }
@@ -17,7 +18,9 @@ namespace base {
                 const char *message,
                 const char *file,
                 int line) {
-            log(message, file, line);
+            if (_log != nullptr) {
+                _log(message, file, line);
+            }
 //            // Crash with access violation and generate crash report.
 //            volatile auto nullptr_value = (int*)nullptr;
 //            *nullptr_value = 0;
@@ -31,6 +34,10 @@ namespace base {
                 --size;
             }
             return path + size;
+        }
+
+        static void init(assert_log log) {
+            _log = log;
         }
 
     } // namespace assertion
@@ -62,6 +69,7 @@ namespace base {
 	SOURCE_FILE_BASENAME,\
 	__LINE__))
 
+#if _LIBCPP_STD_VER <= 14 && !defined(_LIBCPP_HAS_NO_VARIABLE_TEMPLATES)
 namespace std {
 #ifdef __clang__
     template<class _Ty1, class _Ty2>
@@ -73,3 +81,4 @@ namespace std {
     inline constexpr bool is_same_v<_Ty, _Ty> = true;
 #endif // __clang__
 } // namespace std
+#endif
