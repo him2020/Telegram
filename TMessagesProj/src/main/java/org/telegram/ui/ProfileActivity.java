@@ -2705,6 +2705,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                                 SharedPreferences sharedPreferences = ApplicationLoader.applicationContext.getSharedPreferences("systemConfig", Context.MODE_PRIVATE);
                                 sharedPreferences.edit().putBoolean("logsEnabled", BuildVars.LOGS_ENABLED).commit();
                                 updateRowsIds();
+                                getConnectionsManager().switchDebugLog(BuildVars.LOGS_ENABLED, BuildVars.LOGS_ENABLED, FileLog.getNetworkLogPath());
                                 listAdapter.notifyDataSetChanged();
                             } else if (which == 5) {
                                 SharedConfig.toggleInappCamera();

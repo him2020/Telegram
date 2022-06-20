@@ -1194,7 +1194,7 @@ NativeByteBuffer *Datacenter::createRequestsData(std::vector<std::unique_ptr<Net
         delete messageBody;
     }
 
-    if (LOGS_ENABLED) DEBUG_D("(account:%u,type:%d) Send: %s (protocolDcId:%d,key:%" PRIu64 "[%" PRId64 "],sessionId:%" PRIu64 "[%" PRId64 "])",
+    if (NETWORK_LOGS_ENABLED) DEBUG_D("(account:%u,type:%d) Send: %s (protocolDcId:%d,key:%" PRIu64 "[%" PRId64 "],sessionId:%" PRIu64 "[%" PRId64 "])",
                               instanceNum, connection->getConnectionType(),
                               DumpToText((const mtpPrime*&)from, (const mtpPrime*)(from + messageSize + 16)).c_str(),
                               datacenterId, authKeyId, authKeyId, connection->getSessionId(), connection->getSessionId());

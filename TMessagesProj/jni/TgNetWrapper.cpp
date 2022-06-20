@@ -195,6 +195,14 @@ void setUserId(JNIEnv *env, jclass c, jint instanceNum, int32_t id) {
     ConnectionsManager::getInstance(instanceNum).setUserId(id);
 }
 
+void switchDebugLog(JNIEnv *env, jclass c, jint instanceNum, jboolean debug, jboolean network, jstring logPath) {
+    const char *logPathStr = env->GetStringUTFChars(logPath, 0);
+    ConnectionsManager::getInstance(instanceNum).switchDebugLog(debug, network, logPathStr);
+    if (logPathStr != 0) {
+        env->ReleaseStringUTFChars(logPath, logPathStr);
+    }
+}
+
 void switchBackend(JNIEnv *env, jclass c, jint instanceNum, jboolean restart) {
     ConnectionsManager::getInstance(instanceNum).switchBackend(restart);
 }
@@ -512,6 +520,7 @@ static JNINativeMethod ConnectionsManagerMethods[] = {
         {"native_setLangCode", "(ILjava/lang/String;)V", (void *) setLangCode},
         {"native_setRegId", "(ILjava/lang/String;)V", (void *) setRegId},
         {"native_setSystemLangCode", "(ILjava/lang/String;)V", (void *) setSystemLangCode},
+        {"native_switchDebugLog", "(IZZLjava/lang/String;)V", (void *) switchDebugLog},
         {"native_switchBackend", "(IZ)V", (void *) switchBackend},
         {"native_switchConnectServer", "(ILjava/lang/String;Ljava/lang/String;[I)V", (void *) switchConnectServer},
         {"native_pauseNetwork", "(I)V", (void *) pauseNetwork},

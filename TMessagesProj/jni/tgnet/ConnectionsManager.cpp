@@ -940,7 +940,7 @@ void ConnectionsManager::onConnectionDataReceived(Connection *connection, Native
         int32_t messageSeqNo = data->readInt32(&error);
         uint32_t messageLength = data->readUint32(&error);
 
-        if (LOGS_ENABLED) DEBUG_D("(account:%u,type:%d) Recv: %s (protocolDcId:%d,key:%" PRIu64 "[%" PRId64 "],sessionId:%" PRIu64 "[%" PRId64 "])",
+        if (NETWORK_LOGS_ENABLED) DEBUG_D("(account:%u,type:%d) Recv: %s (protocolDcId:%d,key:%" PRIu64 "[%" PRId64 "],sessionId:%" PRIu64 "[%" PRId64 "])",
                                   instanceNum, connection->getConnectionType(),
                                   DumpToText((const mtpPrime*&)from, (const mtpPrime*)(from + messageLength + 16)).c_str(),
                                   datacenter->getDatacenterId(), keyId, keyId, connection->getSessionId(), connection->getSessionId());
@@ -1965,6 +1965,21 @@ void ConnectionsManager::setUserId(int32_t userId) {
                 sendPing(datacenter, true);
             }
         }
+    });
+}
+
+void ConnectionsManager::switchDebugLog(bool debug, bool network, std::string logPath) {
+    scheduleTask([&, debug, network, logPath] {
+       LOGS_ENABLED = debug;
+       NETWORK_LOGS_ENABLED = network;
+       if (debug | network) {
+           if (logPath.size() > 0) {
+               currentLogPath = logPath;
+           }
+           FileLog::getInstance().reset(currentLogPath);
+       } else {
+           FileLog::getInstance().close();
+       }
     });
 }
 

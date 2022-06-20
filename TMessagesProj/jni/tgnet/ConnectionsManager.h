@@ -59,6 +59,7 @@ public:
     void setDelegate(ConnectiosManagerDelegate *connectiosManagerDelegate);
     ConnectionState getConnectionState();
     void setUserId(int32_t userId);
+    void switchDebugLog(bool debug, bool network, std::string logPath);
     void switchBackend(bool restart);
     void switchConnectServer(std::string hostName, std::string hostAddress, std::vector<uint32_t> ports);
     void resumeNetwork(bool partial);

@@ -453,6 +453,10 @@ public class ConnectionsManager extends BaseController {
         }
     }
 
+    public void switchDebugLog(boolean debug, boolean network, String logPath) {
+        native_switchDebugLog(currentAccount, debug, network, logPath);
+    }
+
     public void switchBackend(boolean restart) {
         SharedPreferences preferences = MessagesController.getGlobalMainSettings();
         preferences.edit().remove("language_showed2").commit();
@@ -732,6 +736,7 @@ public class ConnectionsManager extends BaseController {
         }
     }
 
+    public static native void native_switchDebugLog(int currentAccount, boolean debug, boolean network, String logPath);
     public static native void native_switchBackend(int currentAccount, boolean restart);
     public static native void native_switchConnectServer(int currentAccount, String hostName, String hostAddress, int[] ports);
     public static native int native_isTestBackend(int currentAccount);
