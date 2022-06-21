@@ -60,7 +60,8 @@ void Handshake::beginHandshake(bool reconnect) {
     request->nonce = std::make_unique<ByteArray>(16);
     RAND_bytes(request->nonce->bytes, 16);
     authNonce = new ByteArray(request->nonce.get());
-    if (LOGS_ENABLED) DEBUG_D("handshake auth_nonce: %s request_nonce: %s",
+    if (LOGS_ENABLED) DEBUG_D("account%u dc%u handshake: type = %d auth_nonce = %s request_nonce = %s",
+                              currentDatacenter->instanceNum, currentDatacenter->datacenterId, handshakeType,
                               DEBUG_H(authNonce->bytes, authNonce->length).c_str(),
                               DEBUG_H(request->nonce.get()->bytes, request->nonce.get()->length).c_str());
     sendRequestData(request, true);
@@ -332,6 +333,10 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
 
         handshakeState = 2;
         auto result = (TL_resPQ *) message;
+        if (LOGS_ENABLED) DEBUG_E("account%u dc%u handshake response: type = %d auth_nonce = %s result_nonce = %s",
+                                  currentDatacenter->instanceNum, currentDatacenter->datacenterId, handshakeType,
+                                  DEBUG_H(authNonce->bytes, authNonce->length).c_str(),
+                                  DEBUG_H(result->nonce.get()->bytes, result->nonce.get()->length).c_str());
         if (authNonce->isEqualTo(result->nonce.get())) {
             std::string key = "";
             int64_t keyFingerprint = 0;
@@ -659,10 +664,6 @@ void Handshake::processHandshakeResponse(TLObject *message, int64_t messageId) {
             sendAckRequest(messageId);
             sendRequestData(request, true);
         } else {
-            if (LOGS_ENABLED) DEBUG_E("account%u dc%u handshake: invalid client nonce, type = %d auth_nonce = %s result_nonce = %s",
-                                      currentDatacenter->instanceNum, currentDatacenter->datacenterId, handshakeType,
-                                      DEBUG_H(authNonce->bytes, authNonce->length).c_str(),
-                                      DEBUG_H(result->nonce.get()->bytes, result->nonce.get()->length).c_str());
             beginHandshake(false);
         }
     } else if (dynamic_cast<Server_DH_Params *>(message)) {

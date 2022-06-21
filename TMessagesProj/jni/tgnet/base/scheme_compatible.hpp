@@ -1,3 +1,19 @@
+// langpack.getLangPack#9ab5c58e lang_code:string = LangPackDifference;
+bool Serialize_langpack_getLangPack_71(DumpToTextBuffer &to, int32 stage, int32 lev, Types &types, Types &vtypes, Stages &stages, Flags &flags, const mtpPrime *start, const mtpPrime *end, uint64 iflag) {
+    if (stage) {
+        to.add(",\n").addSpaces(lev);
+    } else {
+        to.add("{ langpack.getLangPack_71");
+        to.add("\n").addSpaces(lev);
+    }
+    switch (stage) {
+        case 0: to.add("  lang_code: "); ++stages.back(); types.push_back(mtpc_string+0); vtypes.push_back(0); stages.push_back(0); flags.push_back(0); break;
+        default: to.add("}"); types.pop_back(); vtypes.pop_back(); stages.pop_back(); flags.pop_back(); break;
+    }
+    return true;
+}
+
+
 // account.registerDevice.layer71#637ea878 token_type:int token:string = Bool;
 bool Serialize_account_registerDevice_71(DumpToTextBuffer &to, int32 stage, int32 lev, Types &types, Types &vtypes, Stages &stages, Flags &flags, const mtpPrime *start, const mtpPrime *end, uint64 iflag) {
     if (stage) {
@@ -46,6 +62,7 @@ bool Serialize_messages_getStickerSet_134(DumpToTextBuffer &to, int32 stage, int
 
 std::map<mtpTypeId, TextSerializer> CreateCompatibleTextSerializers() {
     return {
+            {mtp_langpack_getLangPack_71, Serialize_langpack_getLangPack_71},
             {mtpc_account_registerDevice_71, Serialize_account_registerDevice_71},
             {mtpc_channels_getMessages_76, Serialize_channels_getMessages_76},
             {mtpc_messages_getStickerSet_134, Serialize_messages_getStickerSet_134},

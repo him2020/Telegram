@@ -21799,7 +21799,7 @@ bool DumpToTextType(DumpToTextBuffer &to, const mtpPrime *&from, const mtpPrime 
         auto it = kSerializers.find(type);
         if (it != kSerializers.end()) {
             if (!(*it->second)(to, stage, lev, types, vtypes, stages, flags, from, end, flag)) {
-                to.error();
+                to.error(type);
                 return false;
             }
         } else if (DumpToTextCore(to, from, end, type, lev, vtype)) {
@@ -21808,7 +21808,7 @@ bool DumpToTextType(DumpToTextBuffer &to, const mtpPrime *&from, const mtpPrime 
             stages.pop_back();
             flags.pop_back();
         } else {
-            to.error();
+            to.error(type);
             return false;
         }
     }

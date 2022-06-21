@@ -5,6 +5,7 @@
 
 enum {
     // compatible
+    mtp_langpack_getLangPack_71 = 0x9ab5c58e,
     mtpc_account_registerDevice_71 = 0x637ea878,
     mtpc_channels_getMessages_76 = 0x93d7b347,
     mtpc_messages_getStickerSet_134 = 0x2619a90e
