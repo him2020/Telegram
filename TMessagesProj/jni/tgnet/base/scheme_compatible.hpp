@@ -1,3 +1,34 @@
+// langPackLanguage#117698f1 name:string native_name:string lang_code:string = LangPackLanguage;
+bool Serialize_langPackLanguage_86(DumpToTextBuffer &to, int32 stage, int32 lev, Types &types, Types &vtypes, Stages &stages, Flags &flags, const mtpPrime *start, const mtpPrime *end, uint64 iflag) {
+    if (stage) {
+        to.add(",\n").addSpaces(lev);
+    } else {
+        to.add("{ langPackLanguage_86");
+        to.add("\n").addSpaces(lev);
+    }
+    switch (stage) {
+        case 0: to.add("  name: "); ++stages.back(); types.push_back(mtpc_string+0); vtypes.push_back(0); stages.push_back(0); flags.push_back(0); break;
+        case 1: to.add("  native_name: "); ++stages.back(); types.push_back(mtpc_string+0); vtypes.push_back(0); stages.push_back(0); flags.push_back(0); break;
+        case 2: to.add("  lang_code: "); ++stages.back(); types.push_back(mtpc_string+0); vtypes.push_back(0); stages.push_back(0); flags.push_back(0); break;
+        default: to.add("}"); types.pop_back(); vtypes.pop_back(); stages.pop_back(); flags.pop_back(); break;
+    }
+    return true;
+}
+
+// langpack.getLanguages#800fd57d = Vector<LangPackLanguage>;
+bool Serialize_langpack_getLanguages_85(DumpToTextBuffer &to, int32 stage, int32 lev, Types &types, Types &vtypes, Stages &stages, Flags &flags, const mtpPrime *start, const mtpPrime *end, uint64 iflag) {
+    if (stage) {
+        to.add(",\n").addSpaces(lev);
+    } else {
+        to.add("{ langpack.getLanguages_85");
+        to.add("\n").addSpaces(lev);
+    }
+    switch (stage) {
+        default: to.add("}"); types.pop_back(); vtypes.pop_back(); stages.pop_back(); flags.pop_back(); break;
+    }
+    return true;
+}
+
 // langpack.getLangPack#9ab5c58e lang_code:string = LangPackDifference;
 bool Serialize_langpack_getLangPack_71(DumpToTextBuffer &to, int32 stage, int32 lev, Types &types, Types &vtypes, Stages &stages, Flags &flags, const mtpPrime *start, const mtpPrime *end, uint64 iflag) {
     if (stage) {
@@ -12,7 +43,6 @@ bool Serialize_langpack_getLangPack_71(DumpToTextBuffer &to, int32 stage, int32 
     }
     return true;
 }
-
 
 // account.registerDevice.layer71#637ea878 token_type:int token:string = Bool;
 bool Serialize_account_registerDevice_71(DumpToTextBuffer &to, int32 stage, int32 lev, Types &types, Types &vtypes, Stages &stages, Flags &flags, const mtpPrime *start, const mtpPrime *end, uint64 iflag) {
@@ -62,7 +92,9 @@ bool Serialize_messages_getStickerSet_134(DumpToTextBuffer &to, int32 stage, int
 
 std::map<mtpTypeId, TextSerializer> CreateCompatibleTextSerializers() {
     return {
-            {mtp_langpack_getLangPack_71, Serialize_langpack_getLangPack_71},
+            {mtpc_langPackLanguage_86, Serialize_langPackLanguage_86},
+            {mtpc_langpack_getLanguages_85, Serialize_langpack_getLanguages_85},
+            {mtpc_langpack_getLangPack_71, Serialize_langpack_getLangPack_71},
             {mtpc_account_registerDevice_71, Serialize_account_registerDevice_71},
             {mtpc_channels_getMessages_76, Serialize_channels_getMessages_76},
             {mtpc_messages_getStickerSet_134, Serialize_messages_getStickerSet_134},
